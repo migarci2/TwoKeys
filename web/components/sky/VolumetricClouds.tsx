@@ -68,61 +68,61 @@ function Field({ small }: { small: boolean }) {
           seed={17}
           segments={small ? 9 : 18}
           bounds={[6.5, 2, 2]}
-          volume={4.4}
+          volume={5}
           concentrate="outside"
           color="#dce9ff"
-          opacity={0.28}
+          opacity={0.34}
           growth={4.2}
           speed={0.055}
-          position={[13.5, -7, -6]}
+          position={[13.5, -7, -4]}
         />
         <Cloud
           seed={41}
           segments={small ? 8 : 16}
           bounds={[6, 1.8, 2]}
-          volume={3.8}
+          volume={5}
           concentrate="outside"
           color="#ffffff"
-          opacity={0.24}
+          opacity={0.34}
           growth={4}
           speed={0.045}
-          position={[-12.5, -17, -8]}
+          position={[-12.5, -17, -4]}
         />
         <Cloud
           seed={73}
           segments={small ? 9 : 18}
           bounds={[7, 2, 2]}
-          volume={4.6}
+          volume={5}
           concentrate="outside"
           color="#e6f0ff"
-          opacity={0.3}
+          opacity={0.34}
           growth={4.4}
           speed={0.06}
-          position={[13, -27, -5]}
+          position={[13, -27, -4]}
         />
         <Cloud
           seed={101}
           segments={small ? 8 : 16}
           bounds={[6.5, 1.8, 2]}
-          volume={4}
+          volume={5}
           concentrate="outside"
           color="#ffffff"
-          opacity={0.22}
+          opacity={0.34}
           growth={4}
           speed={0.05}
-          position={[-13, -37, -9]}
+          position={[-13, -37, -4]}
         />
         <Cloud
           seed={137}
           segments={small ? 9 : 18}
           bounds={[7, 2.2, 2]}
-          volume={4.8}
+          volume={5}
           concentrate="outside"
           color="#dce9ff"
-          opacity={0.28}
+          opacity={0.34}
           growth={4.4}
           speed={0.065}
-          position={[12.5, -47, -6]}
+          position={[12.5, -47, -4]}
         />
       </Clouds>
     </group>
