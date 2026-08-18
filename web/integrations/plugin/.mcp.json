@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "twokeys": {
+      "type": "stdio",
+      "command": "node",
+      "args": [
+        "--experimental-strip-types",
+        "${CLAUDE_PLUGIN_ROOT}/../../scripts/mcp-server.ts"
+      ],
+      "env": {
+        "TWOKEYS_BASE_URL": "http://localhost:3000"
+      }
+    }
+  }
+}

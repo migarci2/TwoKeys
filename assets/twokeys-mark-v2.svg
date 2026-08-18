@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="TwoKeys">
+  <path fill="#155EEF" d="M10 6h26v10H20v12h16v8H10l-4-4V10l4-4Z"/>
+  <path fill="#FF5A4F" d="M54 58H28V48h16V36H28v-8h26l4 4v22l-4 4Z"/>
+  <path fill="#101828" d="M28 28h8v8h-8Z"/>
+</svg>

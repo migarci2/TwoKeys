@@ -1,0 +1,44 @@
+{
+  "name": "web-scaffold",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint",
+    "test": "node --test --experimental-strip-types lib/server/*.test.ts",
+    "mcp": "node --experimental-strip-types scripts/mcp-server.ts",
+    "test:firestore": "FIRESTORE_EMULATOR_HOST=127.0.0.1:8787 GOOGLE_CLOUD_PROJECT=demo-twokeys STATE_BACKEND=firestore node --test --experimental-strip-types lib/server/store-firestore.integration.ts",
+    "ads:snapshot": "node --experimental-strip-types scripts/google-ads-snapshot.ts",
+    "ads:reset": "node --experimental-strip-types scripts/google-ads-reset.ts"
+  },
+  "dependencies": {
+    "@google-cloud/firestore": "^9.0.0",
+    "@google/adk": "^1.6.0",
+    "@google/genai": "^2.17.1",
+    "@modelcontextprotocol/sdk": "^1.30.0",
+    "@react-three/drei": "^10.7.8",
+    "@react-three/fiber": "^9.7.0",
+    "fitty": "^2.4.2",
+    "next": "16.3.0",
+    "react": "19.2.8",
+    "react-device-frameset": "^1.3.4",
+    "react-dom": "19.2.8",
+    "three": "^0.185.1",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "@types/three": "^0.185.4",
+    "eslint": "^9",
+    "eslint-config-next": "16.3.0",
+    "simple-icons": "^16.28.0",
+    "tailwindcss": "^4",
+    "typescript": "^5"
+  }
+}

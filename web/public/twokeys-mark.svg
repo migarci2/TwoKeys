@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 220" role="img" aria-labelledby="title desc">
+  <title id="title">TwoKeys mark</title>
+  <desc id="desc">Two mirrored open octagonal loops joined by a shared horizontal key bar.</desc>
+
+  <defs>
+    <linearGradient id="left-ring" x1="20" y1="28" x2="150" y2="192" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#3478FF"/>
+      <stop offset="1" stop-color="#1F5EF4"/>
+    </linearGradient>
+
+    <linearGradient id="bridge" x1="76" y1="0" x2="244" y2="0" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFFFFF"/>
+      <stop offset="0.5" stop-color="#C9D9FF"/>
+      <stop offset="1" stop-color="#5E8EFF"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Left keyholder -->
+  <path
+    d="M135 86V49L123 37H45L33 49V171L45 183H123L135 171V132"
+    fill="none"
+    stroke="url(#left-ring)"
+    stroke-width="20"
+    stroke-linecap="butt"
+    stroke-linejoin="bevel"
+  />
+
+  <!-- Right keyholder -->
+  <path
+    d="M185 86V49L197 37H275L287 49V171L275 183H197L185 171V132"
+    fill="none"
+    stroke="#FFFFFF"
+    stroke-width="20"
+    stroke-linecap="butt"
+    stroke-linejoin="bevel"
+  />
+
+  <!-- Shared action / consent bar -->
+  <path
+    d="M80 98L86 92H100L106 98H210L216 92H232L238 98V112L232 118H216L210 112H106L100 118H86L80 112Z"
+    fill="url(#bridge)"
+  />
+</svg>

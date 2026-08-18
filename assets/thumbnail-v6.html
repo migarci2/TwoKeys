@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>TwoKeys thumbnail</title>
+<!-- Flush left, and sized against the Devpost card — which renders this at about
+     270px wide — rather than against the 1500px artboard. One word of the claim is
+     picked out in --accent-ink so it reads as a claim, not as body copy.
+     Two switches, both classes on <body>:
+       wordmark  wm-unbounded | wm-cabinet | wm-clash | wm-gabarito | wm-sora | wm-plex
+       claim     l-unbounded | l-archivo | l-space | l-plex
+     Cabinet Grotesk and Clash Display come from Fontshare, the rest from Google Fonts.
+     The lockup is fitted to a fixed optical width at load, so any face lands at the
+     same size. The mark is 1.3em because Unbounded is wide: fitting to width lowers
+     the font-size, and an em-sized mark shrinks with it.
+     body carries font-stretch:100% on purpose: the Archivo request exposes the wdth
+     axis, and an unpinned default came back as a different instance between renders.
+     Render (3:2, 3000x2000). Chrome's window-size counts ~87px of browser UI, so
+     shoot taller and crop back:
+     google-chrome --headless=old --disable-gpu --hide-scrollbars \
+       --force-device-scale-factor=2 --window-size=1500,1087 \
+       --virtual-time-budget=12000 --screenshot=raw.png file://$PWD/thumbnail-v6.html
+     then crop raw.png to (0,0,3000,2000). -->
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://api.fontshare.com/v2/css?f[]=clash-display@600&f[]=cabinet-grotesk@800&display=block" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@600&family=Gabarito:wght@800&family=Sora:wght@700&family=Anton&family=Archivo:ital,wdth,wght@0,62..125,400..700;1,62..125,400..700&family=IBM+Plex+Mono:wght@500;600&family=Space+Grotesk:wght@500;700&display=block" rel="stylesheet">
+<style>
+  :root{
+    --canvas-top:#072a7a; --canvas-bottom:#1f6ee6;
+    --sky-tint:#1b5fd8; --sky-veil:rgb(7 42 122 / 0.28);
+    --ink:#fff; --ink-2:rgb(255 255 255 / .82);--accent-ink:#8fd0ff; --on-accent:#0a3288;
+    --W:1500px; --H:1000px;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{background:#000}
+  body{font-family:Archivo,sans-serif;font-stretch:100%;-webkit-font-smoothing:antialiased;font-synthesis:none}
+
+  .frame{
+    position:relative;width:var(--W);height:var(--H);overflow:hidden;isolation:isolate;
+    display:flex;flex-direction:column;
+    background:linear-gradient(to bottom,var(--canvas-top),var(--canvas-bottom));
+    color:var(--ink);
+  }
+
+  /* Sky, same recipe as the site: footage frame, brand blue multiplied over it,
+     then a veil. */
+  .sky{position:absolute;inset:0;z-index:0}
+  .sky img{width:100%;height:100%;object-fit:cover;object-position:50% 42%}
+  .tint{position:absolute;inset:0;background:var(--sky-tint);mix-blend-mode:multiply}
+  .veil{position:absolute;inset:0;background:var(--sky-veil)}
+  .vignette{position:absolute;inset:0;
+    background:radial-gradient(120% 90% at 50% 45%,transparent 42%,rgb(4 26 82 / .42) 100%),
+               linear-gradient(to bottom,rgb(7 42 122 / .5) 0%,transparent 26%,transparent 66%,rgb(6 26 77 / .42) 100%)}
+
+  .content{position:relative;z-index:2;flex:1;min-height:0;
+           display:flex;flex-direction:column;justify-content:center;align-items:flex-start;
+           text-align:left;padding:0 104px 10px}
+
+  /* --- the lockup: mark plus name, now that the name is part of the logo --- */
+  .lockup{display:flex;align-items:center;gap:.34em;font-size:200px;line-height:1}
+  .lockup svg{height:1.3em;width:auto;display:block}
+  .wm{line-height:1;white-space:nowrap}
+  /* Switch the wordmark face by swapping the class on <body>. */
+  .wm-plex     .wm{font-family:"IBM Plex Mono";font-weight:600;letter-spacing:-.01em}
+  .wm-plexcaps .wm{font-family:"IBM Plex Mono";font-weight:600;text-transform:uppercase;letter-spacing:.02em}
+  .wm-expanded .wm{font-family:Archivo;font-weight:700;font-stretch:125%;letter-spacing:-.005em}
+  .wm-space    .wm{font-family:"Space Grotesk";font-weight:700;letter-spacing:-.03em}
+  .wm-unbounded .wm{font-family:Unbounded;font-weight:600;letter-spacing:-.04em}
+  .wm-clash     .wm{font-family:"Clash Display";font-weight:600;letter-spacing:-.02em}
+  .wm-cabinet   .wm{font-family:"Cabinet Grotesk";font-weight:800;letter-spacing:-.03em}
+  .wm-gabarito  .wm{font-family:Gabarito;font-weight:800;letter-spacing:-.03em}
+  .wm-sora      .wm{font-family:Sora;font-weight:700;letter-spacing:-.04em}
+
+  /* --- the line under it, in the poster face --- */
+  h1{width:560px;margin-top:48px;font-family:Anton,sans-serif;font-weight:400;
+     text-transform:uppercase;letter-spacing:.005em;line-height:.9}
+  h1 .line{display:block;width:max-content;margin:0 auto}
+  h1 i{font-style:normal;display:inline-block}
+  .lean i{transform:skewX(-9deg)}
+  .l-hollow{color:transparent;-webkit-text-stroke:.022em #fff;paint-order:stroke fill;line-height:.96;
+    background-image:linear-gradient(100deg,transparent 30%,rgb(255 255 255 / .92) 50%,transparent 70%);
+    background-size:260% 100%;background-position:34% 0;background-repeat:no-repeat;
+    -webkit-background-clip:text;background-clip:text}
+  .l-solid{color:#fff;line-height:.88;text-shadow:0 2px 40px rgb(4 22 70 / .35)}
+
+  .lead{margin-top:56px;max-width:1300px;font-size:104px;line-height:1.16;
+    letter-spacing:-.03em;color:rgb(255 255 255 / .94)}
+  .l-plex .lead{font-family:"IBM Plex Mono";font-weight:500;letter-spacing:-.045em}
+  .l-archivo .lead{font-family:Archivo;font-weight:600}
+  .l-unbounded .lead{font-family:Unbounded;font-weight:500;font-size:94px;letter-spacing:-.045em}
+  .l-space .lead{font-family:"Space Grotesk";font-weight:600}
+  .lead em{font-style:normal;color:var(--accent-ink)}
+  .lead b{color:#fff;font-weight:600}
+
+</style>
+</head>
+<body class="wm-unbounded l-unbounded">
+<div class="frame">
+  <div class="sky">
+    <img src="../web/public/sky/day-poster.jpg" alt="">
+    <div class="tint"></div>
+    <div class="veil"></div>
+    <div class="vignette"></div>
+  </div>
+
+  <div class="content">
+    <div class="lockup">
+      <svg viewBox="0 0 320 220" aria-label="TwoKeys">
+        <defs>
+          <linearGradient id="ring" x1="20" y1="28" x2="150" y2="192" gradientUnits="userSpaceOnUse">
+            <stop offset="0" stop-color="#3478ff"/><stop offset="1" stop-color="#1f5ef4"/>
+          </linearGradient>
+          <linearGradient id="bar" x1="76" y1="0" x2="244" y2="0" gradientUnits="userSpaceOnUse">
+            <stop offset="0" stop-color="#fff"/><stop offset=".5" stop-color="#c9d9ff"/><stop offset="1" stop-color="#5e8eff"/>
+          </linearGradient>
+        </defs>
+        <path d="M135 86V49L123 37H45L33 49V171L45 183H123L135 171V132" fill="none" stroke="url(#ring)" stroke-width="20" stroke-linejoin="bevel"/>
+        <path d="M185 86V49L197 37H275L287 49V171L275 183H197L185 171V132" fill="none" stroke="#fff" stroke-width="20" stroke-linejoin="bevel"/>
+        <path d="M80 98L86 92H100L106 98H210L216 92H232L238 98V112L232 118H216L210 112H106L100 118H86L80 112Z" fill="url(#bar)"/>
+      </svg>
+      <span class="wm">TwoKeys</span>
+    </div>
+
+
+    <p class="lead">Agents act.<br><em>People</em> decide.</p>
+  </div>
+
+</div>
+
+<script>
+  // Same trick as the site's FitText: scale the poster line to the exact width
+  // of its block, so it always sits flush under the lockup.
+  document.fonts.ready.then(() => {
+    // One optical width for the lockup whatever the face is: measure at a known
+    // size and scale from there. Keeps wide faces inside the frame.
+    const lock = document.querySelector('.lockup');
+    lock.style.fontSize = '100px';
+    lock.style.fontSize = (100 * 1250 / lock.getBoundingClientRect().width) + 'px';
+    const box = document.querySelector('h1');
+    const w = box.clientWidth;
+    for (const line of box.querySelectorAll('.line')) {
+      line.style.fontSize = '100px';
+      line.style.fontSize = (100 * w / line.getBoundingClientRect().width) + 'px';
+    }
+  });
+</script>
+</body>
+</html>

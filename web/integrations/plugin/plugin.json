@@ -1,0 +1,5 @@
+{
+  "$schema": "https://antigravity.google/schemas/v1/plugin.json",
+  "name": "twokeys",
+  "description": "Organizational authority for agent actions: propose_action and await_decision against a TwoKeys deployment."
+}

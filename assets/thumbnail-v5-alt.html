@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>TwoKeys thumbnail</title>
+<!-- Render (3:2, 3000x2000). Chrome's window-size counts ~87px of browser UI,
+     so shoot taller and crop back:
+     google-chrome --headless=old --disable-gpu --hide-scrollbars \
+       --force-device-scale-factor=2 --window-size=1500,1087 \
+       --virtual-time-budget=12000 --screenshot=raw.png file://$PWD/thumbnail-v5.html
+     then crop raw.png to (0,0,3000,2000). -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:wght@400;500;600;700&display=block" rel="stylesheet">
+<style>
+  :root{
+    --canvas-top:#072a7a;
+    --canvas-bottom:#1f6ee6;
+    --sky-tint:#1b5fd8;
+    --sky-veil:rgb(7 42 122 / 0.28);
+    --ink:#fff;
+    --ink-2:rgb(255 255 255 / .82);
+    --on-accent:#0a3288;
+    --W:1500px; --H:1000px;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{background:#000}
+  body{font-family:Archivo,sans-serif;-webkit-font-smoothing:antialiased;font-synthesis:none}
+
+  .frame{
+    position:relative;width:var(--W);height:var(--H);overflow:hidden;isolation:isolate;
+    display:flex;flex-direction:column;
+    background:linear-gradient(to bottom,var(--canvas-top),var(--canvas-bottom));
+    color:var(--ink);
+  }
+
+  /* Sky, same recipe as the site: footage frame, brand blue multiplied over it,
+     then a veil. */
+  .sky{position:absolute;inset:0;z-index:0}
+  .sky img{width:100%;height:100%;object-fit:cover;object-position:50% 42%}
+  .tint{position:absolute;inset:0;background:var(--sky-tint);mix-blend-mode:multiply}
+  .veil{position:absolute;inset:0;background:var(--sky-veil)}
+  /* Corners down, centre open: keeps the caps off the brightest cloud. */
+  .vignette{position:absolute;inset:0;
+    background:radial-gradient(120% 90% at 50% 45%,transparent 42%,rgb(4 26 82 / .42) 100%),
+               linear-gradient(to bottom,rgb(7 42 122 / .55) 0%,transparent 26%,transparent 62%,rgb(6 26 77 / .62) 100%)}
+
+  .content{position:relative;z-index:2;flex:1;min-height:0;display:flex;flex-direction:column;padding:56px 72px 0}
+
+  /* --- top row --- */
+  .top{display:flex;align-items:center;justify-content:space-between}
+  .lockup{display:flex;align-items:center;gap:14px}
+  .lockup svg{height:44px;width:auto;display:block}
+  .lockup span{font-size:34px;font-weight:600;letter-spacing:-.015em}
+  .pill{
+    display:flex;align-items:center;gap:12px;
+    border:1px solid rgb(255 255 255 / .32);border-radius:999px;
+    background:rgb(255 255 255 / .10);
+    padding:12px 22px;font-size:19px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;
+    color:var(--ink-2);
+  }
+  .dot{width:9px;height:9px;border-radius:50%;background:#fff;box-shadow:0 0 0 5px rgb(255 255 255 / .18)}
+
+  /* --- headline --- */
+  .mid{flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding-bottom:24px}
+  h1{width:680px;font-family:Anton,sans-serif;font-weight:400;text-transform:uppercase;letter-spacing:.005em}
+  h1 .line{display:block;width:max-content;margin:0 auto;white-space:nowrap}
+  .l1{line-height:.96}
+  .l2{line-height:.88}
+  /* Site's hollow: transparent fill, hairline white stroke, diagonal sheen. */
+  .hollow{
+    color:transparent;-webkit-text-stroke:.022em var(--ink);paint-order:stroke fill;
+    background-image:linear-gradient(100deg,transparent 30%,rgb(255 255 255 / .92) 50%,transparent 70%);
+    background-size:260% 100%;background-position:34% 0;background-repeat:no-repeat;
+    -webkit-background-clip:text;background-clip:text;
+  }
+  .solid{color:#fff;text-shadow:0 2px 40px rgb(4 22 70 / .35)}
+
+  .lead{margin-top:36px;font-size:28px;line-height:1.45;color:var(--ink-2);max-width:52ch}
+  .lead b{color:#fff;font-weight:600}
+
+  /* --- bottom band, the card's shelf --- */
+  .band{
+    position:relative;z-index:3;flex:none;height:92px;
+    background:#fff;color:var(--on-accent);
+    display:flex;align-items:center;justify-content:center;gap:20px;
+    font-size:22px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;
+  }
+  .band .sep{width:7px;height:7px;border-radius:50%;background:rgb(10 50 136 / .38)}
+</style>
+</head>
+<body>
+<div class="frame">
+  <div class="sky">
+    <img src="../web/public/sky/day-poster.jpg" alt="">
+    <div class="tint"></div>
+    <div class="veil"></div>
+    <div class="vignette"></div>
+  </div>
+
+  <div class="content">
+    <div class="top">
+      <div class="lockup">
+        <svg viewBox="0 0 320 220" aria-label="TwoKeys">
+          <defs>
+            <linearGradient id="ring" x1="20" y1="28" x2="150" y2="192" gradientUnits="userSpaceOnUse">
+              <stop offset="0" stop-color="#3478ff"/><stop offset="1" stop-color="#1f5ef4"/>
+            </linearGradient>
+            <linearGradient id="bar" x1="76" y1="0" x2="244" y2="0" gradientUnits="userSpaceOnUse">
+              <stop offset="0" stop-color="#fff"/><stop offset=".5" stop-color="#c9d9ff"/><stop offset="1" stop-color="#5e8eff"/>
+            </linearGradient>
+          </defs>
+          <path d="M135 86V49L123 37H45L33 49V171L45 183H123L135 171V132" fill="none" stroke="url(#ring)" stroke-width="20" stroke-linejoin="bevel"/>
+          <path d="M185 86V49L197 37H275L287 49V171L275 183H197L185 171V132" fill="none" stroke="#fff" stroke-width="20" stroke-linejoin="bevel"/>
+          <path d="M80 98L86 92H100L106 98H210L216 92H232L238 98V112L232 118H216L210 112H106L100 118H86L80 112Z" fill="url(#bar)"/>
+        </svg>
+        <span>TwoKeys</span>
+      </div>
+      <div class="pill"><i class="dot"></i>No agreement, no action</div>
+    </div>
+
+    <div class="mid">
+      <h1>
+        <span class="line l1 hollow">Keep</span>
+        <span class="line l2 solid">control</span>
+      </h1>
+      <p class="lead">Your agent can call the API. It still cannot decide for the company.
+        <b>Two people approve the same plan, or nothing runs.</b></p>
+    </div>
+  </div>
+
+  <div class="band">
+    <span>Built for All Things Agentic</span>
+    <i class="sep"></i>
+    <span>Track: The Collaborative Partner</span>
+  </div>
+</div>
+
+<script>
+  // Same trick as the site's FitText: scale each display line to the exact
+  // width of the block, so the two lines end up flush whatever the words are.
+  document.fonts.ready.then(() => {
+    const box = document.querySelector('h1');
+    const w = box.clientWidth;
+    for (const line of box.querySelectorAll('.line')) {
+      line.style.fontSize = '100px';
+      const scale = w / line.getBoundingClientRect().width;
+      line.style.fontSize = (100 * scale) + 'px';
+    }
+    document.documentElement.dataset.ready = '1';
+  });
+</script>
+</body>
+</html>

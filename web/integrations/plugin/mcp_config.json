@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "twokeys": {
+      "command": "node",
+      "args": [
+        "--experimental-strip-types",
+        "/ABSOLUTE/PATH/TO/TwoKeys/web/scripts/mcp-server.ts"
+      ],
+      "env": {
+        "TWOKEYS_BASE_URL": "http://localhost:3000"
+      }
+    }
+  }
+}
