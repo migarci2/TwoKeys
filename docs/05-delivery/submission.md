@@ -56,14 +56,6 @@ issued, and a deterministic executor flips the campaign from `PAUSED` to
 `ENABLED` in a Google Ads test account, then reads the resource back and stores a
 receipt. Replaying the lease is denied.
 
-Because the two role contexts are isolated by design, the agent is the only
-participant that has seen both. When the keyholders' conditions conflict, it
-intersects their constraint sets and proposes a version satisfying both, or
-reports that no such action exists and stops, naming the exact trade-off that
-requires a human conversation. It negotiates the shape of the action. It never
-negotiates the authority to take it.
-[EVIDENCE PENDING: reconciliation implemented and demonstrated]
-
 ## The invariant
 
 ```text
@@ -89,7 +81,7 @@ never grants authority.
 - Cross-role memory isolation, so one keyholder's private feedback never reaches
   the other's surface.
 - Per-role adaptation across episodes: explicit CEO feedback changes only the
-  later CEO surface. [EVIDENCE PENDING: episode 2 memory-off/on result]
+  later CEO surface in the local M1 check; live Gemini evidence capture remains.
 
 ## Technologies
 

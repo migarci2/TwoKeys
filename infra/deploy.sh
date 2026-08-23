@@ -15,6 +15,7 @@ SECRET_IDS=(
   twokeys-session-secret
   twokeys-finance-access-code
   twokeys-ceo-access-code
+  twokeys-agent-seam-key
   twokeys-gemini-api-key
   twokeys-google-ads-developer-token
   twokeys-google-ads-client-id
@@ -125,7 +126,7 @@ gcloud run deploy "${SERVICE_NAME}" \
   --allow-unauthenticated \
   --cpu=1 --memory=512Mi --concurrency=20 --min-instances=0 --max-instances=3 \
   --set-env-vars="STATE_BACKEND=firestore,EXECUTOR_MODE=google_ads,FIRESTORE_DATABASE_ID=(default),GEMINI_MODEL=gemini-3.7-flash,GOOGLE_ADS_API_VERSION=v25,GOOGLE_ADS_CONFIGURATION_SNAPSHOT_HASH=${GOOGLE_ADS_CONFIGURATION_SNAPSHOT_HASH}" \
-  --set-secrets="SESSION_SECRET=twokeys-session-secret:latest,FINANCE_ACCESS_CODE=twokeys-finance-access-code:latest,CEO_ACCESS_CODE=twokeys-ceo-access-code:latest,GEMINI_API_KEY=twokeys-gemini-api-key:latest,GOOGLE_ADS_DEVELOPER_TOKEN=twokeys-google-ads-developer-token:latest,GOOGLE_ADS_CLIENT_ID=twokeys-google-ads-client-id:latest,GOOGLE_ADS_CLIENT_SECRET=twokeys-google-ads-client-secret:latest,GOOGLE_ADS_REFRESH_TOKEN=twokeys-google-ads-refresh-token:latest,GOOGLE_ADS_CUSTOMER_ID=twokeys-google-ads-customer-id:latest,GOOGLE_ADS_CAMPAIGN_ID=twokeys-google-ads-campaign-id:latest,GOOGLE_ADS_LOGIN_CUSTOMER_ID=twokeys-google-ads-login-customer-id:latest" \
+  --set-secrets="SESSION_SECRET=twokeys-session-secret:latest,FINANCE_ACCESS_CODE=twokeys-finance-access-code:latest,CEO_ACCESS_CODE=twokeys-ceo-access-code:latest,AGENT_SEAM_KEY=twokeys-agent-seam-key:latest,GEMINI_API_KEY=twokeys-gemini-api-key:latest,GOOGLE_ADS_DEVELOPER_TOKEN=twokeys-google-ads-developer-token:latest,GOOGLE_ADS_CLIENT_ID=twokeys-google-ads-client-id:latest,GOOGLE_ADS_CLIENT_SECRET=twokeys-google-ads-client-secret:latest,GOOGLE_ADS_REFRESH_TOKEN=twokeys-google-ads-refresh-token:latest,GOOGLE_ADS_CUSTOMER_ID=twokeys-google-ads-customer-id:latest,GOOGLE_ADS_CAMPAIGN_ID=twokeys-google-ads-campaign-id:latest,GOOGLE_ADS_LOGIN_CUSTOMER_ID=twokeys-google-ads-login-customer-id:latest" \
   --project="${GCP_PROJECT_ID}"
 
 SERVICE_URL="$(gcloud run services describe "${SERVICE_NAME}" --region="${GCP_REGION}" \

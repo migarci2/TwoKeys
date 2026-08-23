@@ -59,11 +59,39 @@ approval validity, lease consumption, and the final Google Ads mutation.
 | Scope and demo contract | Decided |
 | Web app, backend, authority kernel, and GCP deployment shape | Implemented and locally verified |
 | Google Ads mutation | REST adapter and read-back contract tested; live test-account run pending credentials |
-| Benchmark results | 26 local checks plus the Firestore transaction/isolation integration pass; live Gemini and Ads runs pending |
+| Benchmark results | 54 automated authority, agent, adapter, privacy, replay and execution checks pass locally; live Gemini and Ads runs pending |
 | Production readiness | Not yet demonstrated |
 
 This repository must not claim completed implementation or zero failures until
 the corresponding evidence exists.
+
+## Run the complete local demo
+
+```bash
+cd web
+cp .env.example .env.local
+npm ci
+npm run dev
+```
+
+Open <http://localhost:3000/demo>. The no-credential path is deliberately
+labelled `LOCAL FALLBACK` and uses the in-memory store plus the simulated Ads
+gateway. Add `GEMINI_API_KEY` to run the ADK agents; the production deploy also
+requires the Secret Manager and Google Ads test-account values in
+[`infra/deploy.sh`](infra/deploy.sh).
+
+## Runtime flow
+
+```mermaid
+flowchart LR
+  R[ADK Revenue Agent] -->|propose_action| K[Deterministic authority kernel]
+  K --> F[(Firestore)]
+  F --> D[Private ADK deliberation]
+  D --> U[Finance and CEO surfaces]
+  U -->|version-bound approvals| K
+  K -->|single-use ActionLease| X[Google Ads executor]
+  X -->|read-back receipt| F
+```
 
 ## Documentation
 

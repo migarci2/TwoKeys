@@ -73,6 +73,58 @@ function LoadingState() {
   );
 }
 
+function KeyGlyph({ complete = false }: { complete?: boolean }) {
+  return (
+    <svg viewBox="0 0 48 48" aria-hidden="true" className="h-9 w-9" fill="none">
+      <circle cx="17" cy="20" r="9" stroke="currentColor" strokeWidth="4" />
+      <path d="M23.5 26.5 38 41m-5-5 4-4m-10 0 4-4" stroke="currentColor" strokeWidth="4" strokeLinecap="round" />
+      {complete && <path d="m12.5 20 3 3 6-7" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />}
+    </svg>
+  );
+}
+
+function DemoProgress({ view }: { view: DecisionView }) {
+  const keysReady = view.approvals.every((approval) => approval.status === "APPROVED");
+  const executed = view.status === "CONFIRMED";
+  const steps = [
+    { label: "Review action", detail: "€30k launch", complete: true },
+    { label: "Match both keys", detail: `${view.approvals.filter((approval) => approval.status === "APPROVED").length}/2 valid`, complete: keysReady || executed },
+    { label: "Execute safely", detail: executed ? "Confirmed" : "Locked", complete: executed },
+  ];
+
+  return (
+    <ol className="grid gap-2 sm:grid-cols-3" aria-label="Demo progress">
+      {steps.map((step, index) => {
+        const active = !step.complete && steps.slice(0, index).every((item) => item.complete);
+        return (
+          <li
+            key={step.label}
+            aria-current={active ? "step" : undefined}
+            className={`relative overflow-hidden rounded-xl border px-4 py-3 transition duration-500 ${
+              step.complete
+                ? "border-white/35 bg-white/14"
+                : active
+                  ? "border-white/45 bg-[#071d55]/80 shadow-[0_0_35px_rgb(169_200_255/0.18)]"
+                  : "border-hairline bg-white/5 text-ink-3"
+            }`}
+          >
+            {active && <span aria-hidden="true" className="scan absolute inset-y-0 left-0 w-1/3 bg-linear-to-r from-transparent via-white/15 to-transparent" />}
+            <div className="relative flex items-center gap-3">
+              <span className={`grid h-7 w-7 shrink-0 place-items-center rounded-full text-xs font-black ${step.complete ? "bg-white text-on-accent" : "border border-current"}`}>
+                {step.complete ? "✓" : index + 1}
+              </span>
+              <span>
+                <span className="block text-sm font-bold text-ink">{step.label}</span>
+                <span className="mt-0.5 block text-xs">{step.detail}</span>
+              </span>
+            </div>
+          </li>
+        );
+      })}
+    </ol>
+  );
+}
+
 function Login({
   localDemo,
   role,
@@ -93,27 +145,36 @@ function Login({
   signIn: () => void;
 }) {
   return (
-    <div className="mx-auto max-w-xl glass-strong p-6 sm:p-9">
-      <p className="text-sm font-semibold text-ink-2">Choose a keyholder</p>
-      <h1 className="mt-3 text-h2 text-balance">Open the same decision through one role.</h1>
+    <div className="mx-auto max-w-2xl overflow-hidden glass-strong p-6 sm:p-9">
+      <p className="text-sm font-semibold text-ink-2">Step 1 of 3 · Pick up the first key</p>
+      <h2 className="mt-3 text-h2 text-balance">Who are you deciding as?</h2>
       <p className="mt-4 max-w-[52ch] text-ink-2">
-        Finance and CEO share the action facts. Each gets the context needed for a different responsibility.
+        Start with Finance for the smoothest story. We’ll tell you exactly when to hand off to the CEO.
       </p>
 
-      <div className="mt-8 grid grid-cols-2 gap-2" aria-label="Keyholder role">
+      <div className="mt-8 grid gap-3 sm:grid-cols-2" aria-label="Keyholder role">
         {(["finance", "ceo"] as const).map((candidate) => (
           <button
             key={candidate}
             type="button"
             onClick={() => setRole(candidate)}
             aria-pressed={role === candidate}
-            className={`rounded-full border px-4 py-3 font-semibold transition active:translate-y-px ${
+            className={`group rounded-xl border p-5 text-left transition duration-300 active:translate-y-px ${
               role === candidate
-                ? "border-white bg-white text-on-accent"
-                : "border-hairline-strong bg-white/5 text-ink hover:bg-white/10"
+                ? "border-white/70 bg-white text-on-accent shadow-[0_16px_45px_rgb(2_12_40/0.25)]"
+                : "border-hairline-strong bg-white/5 text-ink hover:-translate-y-0.5 hover:bg-white/10"
             }`}
           >
-            {roleNames[candidate]}
+            <span className="flex items-center justify-between gap-4">
+              <KeyGlyph complete={role === candidate} />
+              <span className="rounded-full border border-current/25 px-2 py-1 text-[0.65rem] font-black tracking-wider">
+                {candidate === "finance" ? "START HERE" : "SECOND KEY"}
+              </span>
+            </span>
+            <span className="mt-4 block text-lg font-bold">{roleNames[candidate]}</span>
+            <span className={`mt-1 block text-sm ${role === candidate ? "text-on-accent/70" : "text-ink-2"}`}>
+              {candidate === "finance" ? "Check budget and downside" : "Set strategy and guardrails"}
+            </span>
           </button>
         ))}
       </div>
@@ -135,7 +196,7 @@ function Login({
 
       {localDemo && (
         <p className="mt-6 rounded-lg border border-hairline bg-white/5 px-4 py-3 text-sm text-ink-2">
-          Local demo authentication is enabled. No access code is required.
+          Demo mode is ready — no access code required.
         </p>
       )}
       {error && (
@@ -150,7 +211,7 @@ function Login({
         onClick={signIn}
         className="mt-6 w-full rounded-full bg-white px-5 py-3.5 font-bold text-on-accent transition hover:bg-white/90 active:translate-y-px disabled:cursor-wait disabled:opacity-60"
       >
-        {busy ? "Opening decision..." : `Continue as ${roleNames[role]}`}
+        {busy ? "Opening the vault..." : `Pick up the ${roleNames[role]} key →`}
       </button>
     </div>
   );
@@ -227,20 +288,41 @@ function ActionCapsule({ view }: { view: DecisionView }) {
 }
 
 function Approvals({ view }: { view: DecisionView }) {
+  const approved = view.approvals.filter((item) => item.status === "APPROVED").length;
   return (
-    <section className="glass p-5 sm:p-6" aria-labelledby="approvals-title">
+    <section className="glass p-5 sm:p-6" aria-labelledby="approvals-title" aria-live="polite">
       <div className="flex items-center justify-between gap-4">
-        <h2 id="approvals-title" className="text-h3">Two independent keys</h2>
-        <span className="text-sm tabular-nums text-ink-2">
-          {view.approvals.filter((item) => item.status === "APPROVED").length}/2 valid
+        <div>
+          <p className="text-sm font-semibold text-ink-2">Authority lock</p>
+          <h2 id="approvals-title" className="mt-1 text-h3">Turn both keys on version {view.action.version}</h2>
+        </div>
+        <span className={`rounded-full px-3 py-1.5 text-sm font-black tabular-nums ${approved === 2 ? "bg-white text-on-accent" : "border border-hairline-strong bg-white/8"}`}>
+          {approved}/2
         </span>
       </div>
-      <div className="mt-5 grid gap-3 sm:grid-cols-2">
+      <div className="relative mt-6 grid gap-3 sm:grid-cols-2">
+        <div aria-hidden="true" className={`absolute left-1/2 top-1/2 hidden h-0.5 w-8 -translate-x-1/2 -translate-y-1/2 sm:block ${approved === 2 ? "bg-white shadow-[0_0_18px_white]" : "bg-white/20"}`} />
         {view.approvals.map((approval) => (
-          <div key={approval.role} className="rounded-lg border border-hairline bg-white/5 p-4">
-            <div className="flex items-center justify-between gap-3">
-              <p className="font-semibold">{roleNames[approval.role]}</p>
-              <span className="text-xs font-bold">{approval.status}</span>
+          <div
+            key={approval.role}
+            className={`relative rounded-xl border p-4 transition duration-500 ${
+              approval.status === "APPROVED"
+                ? "border-white/55 bg-white/16 shadow-[0_12px_40px_rgb(169_200_255/0.14)]"
+                : approval.status === "STALE"
+                  ? "border-amber-200/45 bg-amber-100/10"
+                  : "border-hairline bg-[#061a4d]/45"
+            }`}
+          >
+            <div className="flex items-center gap-3">
+              <span className={`grid h-12 w-12 shrink-0 place-items-center rounded-full ${approval.status === "APPROVED" ? "bg-white text-on-accent" : "border border-hairline-strong text-ink-2"}`}>
+                <KeyGlyph complete={approval.status === "APPROVED"} />
+              </span>
+              <div className="min-w-0">
+                <p className="font-bold">{roleNames[approval.role]}</p>
+                <p className="mt-0.5 text-xs font-black tracking-wider text-ink-2">
+                  {approval.status === "APPROVED" ? "KEY LOCKED" : approval.status === "STALE" ? "KEY EXPIRED" : "WAITING"}
+                </p>
+              </div>
             </div>
             <p className="mt-2 text-sm text-ink-2">
               {approval.status === "APPROVED"
@@ -827,8 +909,98 @@ export function DecisionConsole({ localDemo }: { localDemo: boolean }) {
     !canAddCondition &&
     myApproval?.status !== "APPROVED";
 
+  const switchRole = () => {
+    if (localDemo || codes[otherRole]) void signIn(otherRole);
+    else {
+      setView(null);
+      setLoginRole(otherRole);
+    }
+  };
+
+  let missionTitle = `Turn the ${roleNames[view.viewerRole]} key`;
+  let missionDetail = `Approve action v${view.action.version}. Your key is bound to this exact action, evidence, and policy.`;
+  if (canAddCondition) {
+    missionTitle = "Add the CEO guardrail";
+    missionDetail = "Make launch readiness a hard condition. This creates v2 and visibly expires any approval on v1.";
+  } else if (view.status === "FULLY_APPROVED" || view.status === "LEASED") {
+    missionTitle = "Both keys match — finish protected execution";
+    missionDetail = "TwoKeys can now issue a single-use lease, mutate the test campaign, and verify the read-back.";
+  } else if (view.status === "CONSUMED") {
+    missionTitle = "Mutation sent — verify the read-back";
+    missionDetail = "Reconcile the external state without attempting a second mutation.";
+  } else if (view.status === "CONFIRMED") {
+    missionTitle = "Unlocked. Campaign confirmed.";
+    missionDetail = "Both keys matched v2. The single-use lease was consumed and Google Ads returned ENABLED.";
+  } else if (myApproval?.status === "APPROVED") {
+    missionTitle = `Your key is locked. Hand off to ${roleNames[otherRole]}.`;
+    missionDetail = `Switch roles to add the matching key on action v${view.action.version}.`;
+  }
+
   return (
     <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,1.15fr)_minmax(22rem,0.85fr)]">
+      <div className="lg:col-span-2">
+        <DemoProgress view={view} />
+      </div>
+
+      <section
+        key={`${view.action.version}-${view.status}-${view.viewerRole}`}
+        className={`composing relative overflow-hidden rounded-[1.25rem] border p-6 shadow-[0_24px_90px_rgb(2_12_40/0.32)] sm:p-8 lg:col-span-2 ${
+          view.status === "CONFIRMED"
+            ? "border-emerald-100/60 bg-[radial-gradient(circle_at_85%_10%,rgb(110_231_183/0.32),transparent_32%),linear-gradient(135deg,rgb(255_255_255/0.2),rgb(6_40_96/0.86))]"
+            : "border-white/45 bg-[radial-gradient(circle_at_85%_10%,rgb(169_200_255/0.3),transparent_34%),linear-gradient(135deg,rgb(255_255_255/0.18),rgb(6_26_77/0.88))]"
+        }`}
+        aria-labelledby="next-mission"
+      >
+        {busy && <span aria-hidden="true" className="scan absolute inset-y-0 left-0 w-1/3 bg-linear-to-r from-transparent via-white/20 to-transparent" />}
+        <div className="relative grid gap-6 lg:grid-cols-[1fr_auto] lg:items-center">
+          <div>
+            <div className="flex items-center gap-2 text-xs font-black tracking-[0.14em] text-ink-2">
+              <span className={`h-2.5 w-2.5 rounded-full ${view.status === "CONFIRMED" ? "bg-emerald-300 shadow-[0_0_16px_rgb(110_231_183)]" : "pulse-dot bg-white"}`} />
+              {view.status === "CONFIRMED" ? "MISSION COMPLETE" : "DO THIS NEXT"}
+            </div>
+            <h2 id="next-mission" className="mt-3 max-w-3xl text-h2 text-balance">{missionTitle}</h2>
+            <p className="mt-3 max-w-2xl text-sm leading-relaxed text-ink-2 sm:text-base">{missionDetail}</p>
+          </div>
+          <div className="flex flex-wrap gap-2 lg:max-w-xs lg:justify-end">
+            {canAddCondition && (
+              <button type="button" disabled={busy} onClick={() => run({ type: "condition", executeBefore: `${view.action.businessDecision.endDate}T23:59:59Z` }, "Guardrail added. Action v2 created; the Finance v1 key expired.")} className="rounded-full bg-white px-6 py-3.5 font-black text-on-accent shadow-[0_10px_30px_rgb(2_12_40/0.25)] transition hover:-translate-y-0.5 hover:shadow-[0_14px_38px_rgb(2_12_40/0.34)] active:translate-y-px disabled:cursor-wait disabled:opacity-60">
+                Add guardrail →
+              </button>
+            )}
+            {canApprove && (
+              <button type="button" disabled={busy} onClick={() => run({ type: "approve" }, `${roleNames[view.viewerRole]} key locked to action v${view.action.version}.`)} className="rounded-full bg-white px-6 py-3.5 font-black text-on-accent shadow-[0_10px_30px_rgb(2_12_40/0.25)] transition hover:-translate-y-0.5 hover:shadow-[0_14px_38px_rgb(2_12_40/0.34)] active:translate-y-px disabled:cursor-wait disabled:opacity-60">
+                Turn {roleNames[view.viewerRole]} key →
+              </button>
+            )}
+            {myApproval?.status === "APPROVED" && view.status !== "CONFIRMED" && view.status !== "FULLY_APPROVED" && view.status !== "LEASED" && view.status !== "CONSUMED" && (
+              <button type="button" disabled={busy} onClick={switchRole} className="rounded-full bg-white px-6 py-3.5 font-black text-on-accent shadow-[0_10px_30px_rgb(2_12_40/0.25)] transition hover:-translate-y-0.5 active:translate-y-px disabled:opacity-60">
+                Switch to {roleNames[otherRole]} →
+              </button>
+            )}
+            {(view.status === "FULLY_APPROVED" || view.status === "LEASED") && (
+              <button type="button" disabled={busy} onClick={() => run({ type: "settle" }, "Protected execution resumed and confirmed.")} className="rounded-full bg-white px-6 py-3.5 font-black text-on-accent transition hover:-translate-y-0.5 active:translate-y-px disabled:opacity-60">
+                Finish execution →
+              </button>
+            )}
+            {view.status === "CONSUMED" && (
+              <button type="button" disabled={busy} onClick={() => run({ type: "reconcile" }, "External state reconciled without another mutation.")} className="rounded-full bg-white px-6 py-3.5 font-black text-on-accent transition hover:-translate-y-0.5 active:translate-y-px disabled:opacity-60">
+                Verify read-back →
+              </button>
+            )}
+            {view.status === "CONFIRMED" && (
+              <button type="button" disabled={busy} onClick={() => run({ type: "execute" }, "Unexpected replay success.")} className="rounded-full border border-white/45 bg-white/10 px-5 py-3 font-bold transition hover:bg-white/16 active:translate-y-px disabled:opacity-60">
+                Test blocked replay
+              </button>
+            )}
+          </div>
+        </div>
+        {(error || notice) && (
+          <p role={error ? "alert" : "status"} className={`relative mt-5 rounded-lg border px-4 py-3 text-sm ${error ? "border-white/45 bg-white/14" : "border-white/25 bg-[#061a4d]/35"}`}>
+            {error || notice}
+          </p>
+        )}
+      </section>
+
       <div className="min-w-0 space-y-5">
         <div className="flex flex-col gap-4 px-1 sm:flex-row sm:items-end sm:justify-between">
           <div>
@@ -838,7 +1010,7 @@ export function DecisionConsole({ localDemo }: { localDemo: boolean }) {
           <button
             type="button"
             disabled={busy}
-            onClick={() => localDemo || codes[otherRole] ? signIn(otherRole) : (setView(null), setLoginRole(otherRole))}
+            onClick={switchRole}
             className="self-start rounded-full border border-hairline-strong px-4 py-2.5 text-sm font-semibold transition hover:bg-white/10 active:translate-y-px disabled:opacity-60 sm:self-auto"
           >
             Switch to {roleNames[otherRole]}
@@ -846,9 +1018,9 @@ export function DecisionConsole({ localDemo }: { localDemo: boolean }) {
         </div>
 
         <ActionCapsule view={view} />
-        <RevenueAgentPanel run={agentRun} busy={busy} start={() => void startRevenueAgent()} />
         <Approvals view={view} />
         <LeaseAndReceipt view={view} />
+        <RevenueAgentPanel run={agentRun} busy={busy} start={() => void startRevenueAgent()} />
       </div>
 
       <aside className="min-w-0 space-y-5">
@@ -865,67 +1037,6 @@ export function DecisionConsole({ localDemo }: { localDemo: boolean }) {
           </div>
           <h2 id="role-lead" className="mt-3 text-h3 text-balance">{view.surface.lead}</h2>
 
-          {(error || notice) && (
-            <p
-              role={error ? "alert" : "status"}
-              className={`mt-5 rounded-lg border px-4 py-3 text-sm ${error ? "border-white/40 bg-white/12" : "border-hairline bg-white/6"}`}
-            >
-              {error || notice}
-            </p>
-          )}
-
-          <div className="mt-6 flex flex-wrap gap-2">
-            {canAddCondition && (
-              <button
-                type="button"
-                disabled={busy}
-                onClick={() => run({ type: "condition", executeBefore: `${view.action.businessDecision.endDate}T23:59:59Z` }, "Action v2 created. Finance v1 is now stale.")}
-                className="rounded-full bg-white px-5 py-3 font-bold text-on-accent transition hover:bg-white/90 active:translate-y-px disabled:cursor-wait disabled:opacity-60"
-              >
-                Add launch guard
-              </button>
-            )}
-            {canApprove && (
-              <button
-                type="button"
-                disabled={busy}
-                onClick={() => run({ type: "approve" }, `${roleNames[view.viewerRole]} approved action v${view.action.version}.`)}
-                className="rounded-full bg-white px-5 py-3 font-bold text-on-accent transition hover:bg-white/90 active:translate-y-px disabled:cursor-wait disabled:opacity-60"
-              >
-                Approve v{view.action.version}
-              </button>
-            )}
-            {(view.status === "FULLY_APPROVED" || view.status === "LEASED") && (
-              <button
-                type="button"
-                disabled={busy}
-                onClick={() => run({ type: "settle" }, "Protected execution resumed and confirmed.")}
-                className="rounded-full border border-hairline-strong px-5 py-3 font-semibold transition hover:bg-white/10 active:translate-y-px disabled:opacity-60"
-              >
-                Resume protected execution
-              </button>
-            )}
-            {view.status === "CONFIRMED" && (
-              <button
-                type="button"
-                disabled={busy}
-                onClick={() => run({ type: "execute" }, "Unexpected replay success.")}
-                className="rounded-full border border-hairline-strong px-5 py-3 font-semibold transition hover:bg-white/10 active:translate-y-px disabled:cursor-wait disabled:opacity-60"
-              >
-                Attempt replay
-              </button>
-            )}
-            {view.status === "CONSUMED" && (
-              <button
-                type="button"
-                disabled={busy}
-                onClick={() => run({ type: "reconcile" }, "External state reconciled without another mutation.")}
-                className="rounded-full border border-hairline-strong px-5 py-3 font-semibold transition hover:bg-white/10 active:translate-y-px disabled:cursor-wait disabled:opacity-60"
-              >
-                Reconcile read-back
-              </button>
-            )}
-          </div>
         </section>
 
         <DeliberationPanel
