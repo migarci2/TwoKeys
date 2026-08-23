@@ -54,6 +54,8 @@
   --sky-tint: #1b5fd8;
   --sky-veil: rgb(7 42 122 / 0.28);
   --bezel: #0b1a3c;
+
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
 }
 
 @theme inline {
@@ -133,6 +135,14 @@ body {
   *::after {
     animation: none !important;
     transition-duration: 0.01ms !important;
+  }
+  ::view-transition-old(.nav-forward),
+  ::view-transition-old(.nav-back) {
+    animation: 120ms var(--ease-out) both page-fade-out !important;
+  }
+  ::view-transition-new(.nav-forward),
+  ::view-transition-new(.nav-back) {
+    animation: 120ms var(--ease-out) both page-fade-in !important;
   }
 }
 
@@ -241,6 +251,54 @@ body {
 /* ------------------------------------------------------------------ *
  * Motion
  * ------------------------------------------------------------------ */
+
+::view-transition {
+  pointer-events: none;
+}
+
+::view-transition-group(site-header),
+::view-transition-new(site-header) {
+  animation: none;
+}
+
+::view-transition-old(site-header) {
+  display: none;
+}
+
+::view-transition-old(.nav-forward),
+::view-transition-old(.nav-back) {
+  animation: 140ms var(--ease-out) both page-content-out;
+}
+
+::view-transition-new(.nav-forward),
+::view-transition-new(.nav-back) {
+  animation: 200ms var(--ease-out) both page-content-in;
+}
+
+@keyframes page-content-out {
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes page-content-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 8px, 0);
+  }
+}
+
+@keyframes page-fade-out {
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes page-fade-in {
+  from {
+    opacity: 0;
+  }
+}
 
 /* Clouds actually travel, rather than wobbling in place: a full pass across
    the viewport and a little vertical rise, over minutes rather than seconds. */

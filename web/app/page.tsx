@@ -1,6 +1,7 @@
+import { ViewTransition } from "react";
+
 import { Nav } from "@/components/site/Nav";
 import { Footer } from "@/components/site/Footer";
-import { SkyBackground } from "@/components/sky/SkyBackground";
 import { Reveal } from "@/components/site/Reveal";
 import { Hero } from "@/components/sections/Hero";
 import { Agents } from "@/components/sections/Agents";
@@ -13,21 +14,26 @@ import { Cta } from "@/components/sections/Cta";
 
 export default function Home() {
   return (
-    <div className="relative isolate">
-      <SkyBackground />
-      <Reveal />
-      <Nav />
-      <main className="relative z-10">
-        <Hero />
-        <Agents />
-        <Failure />
-        <How />
-        <Execute />
-        <Adaptation />
-        <Boundaries />
-        <Cta />
-      </main>
-      <Footer />
-    </div>
+    <ViewTransition
+      enter={{ "nav-forward": "nav-forward", "nav-back": "nav-back", default: "none" }}
+      exit={{ "nav-forward": "nav-forward", "nav-back": "nav-back", default: "none" }}
+      default="none"
+    >
+      <div className="relative isolate">
+        <Reveal />
+        <Nav />
+        <main className="relative z-10">
+          <Hero />
+          <Agents />
+          <Failure />
+          <How />
+          <Execute />
+          <Adaptation />
+          <Boundaries />
+          <Cta />
+        </main>
+        <Footer />
+      </div>
+    </ViewTransition>
   );
 }

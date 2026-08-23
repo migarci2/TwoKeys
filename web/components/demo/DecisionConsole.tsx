@@ -1,12 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { SCENARIOS, eur } from "@/lib/fixture";
 import type { Role } from "@/lib/server/authority";
 import type { DecisionView } from "@/lib/server/dto";
 import type {
+  DeliberationTurnView,
   GeneratedSurfaceResponse,
+  RevenueAgentResponse,
   SurfaceComparisonResponse,
   SurfaceModule,
 } from "@/lib/types";
@@ -17,6 +19,7 @@ type Command =
   | { type: "issue_lease" }
   | { type: "execute" }
   | { type: "reconcile" }
+  | { type: "settle" }
   | { type: "revoke_lease"; leaseId: string };
 
 const roleNames: Record<Role, string> = { finance: "Finance", ceo: "CEO" };
@@ -377,6 +380,159 @@ function LeaseAndReceipt({ view }: { view: DecisionView }) {
   );
 }
 
+function RevenueAgentPanel({
+  run,
+  busy,
+  start,
+}: {
+  run: RevenueAgentResponse | null;
+  busy: boolean;
+  start: () => void;
+}) {
+  return (
+    <section className="glass p-5 sm:p-6" aria-labelledby="revenue-agent-title">
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <p className="text-sm font-semibold text-ink-2">Background workflow</p>
+          <h2 id="revenue-agent-title" className="mt-2 text-h3">Revenue Agent</h2>
+        </div>
+        <span className="rounded-full border border-hairline-strong bg-white/8 px-3 py-1.5 text-xs font-bold tracking-wide">
+          {run ? `${run.source === "adk" ? "ADK LIVE" : "LOCAL FALLBACK"} · ${run.decision.state}` : "READY"}
+        </span>
+      </div>
+      {run ? (
+        <div className="mt-5">
+          <p className="text-sm leading-relaxed text-ink-2">
+            Parsed the launch thread, proposed the governed campaign, and resolved {run.decision.requiredRoles.length} organizational keys through {run.decision.matchedRuleIds.join(", ")}.
+          </p>
+          <p className="mt-3 break-all font-mono text-xs text-ink-3">{run.decision.decisionId}</p>
+        </div>
+      ) : (
+        <>
+          <p className="mt-4 text-sm leading-relaxed text-ink-2">
+            Marketing, Product, and Finance left one messy launch thread. The agent extracts the action and evidence, then proposes it without choosing its approvers.
+          </p>
+          <button
+            type="button"
+            disabled={busy}
+            onClick={start}
+            className="mt-5 rounded-full border border-hairline-strong px-4 py-2.5 text-sm font-semibold transition hover:bg-white/10 active:translate-y-px disabled:opacity-60"
+          >
+            {busy ? "Reading launch thread..." : "Run Revenue Agent"}
+          </button>
+        </>
+      )}
+    </section>
+  );
+}
+
+function DeliberationPanel({
+  role,
+  turns,
+  value,
+  busy,
+  setValue,
+  send,
+}: {
+  role: Role;
+  turns: DeliberationTurnView[];
+  value: string;
+  busy: boolean;
+  setValue: (value: string) => void;
+  send: (message?: string) => void;
+}) {
+  const transcript = useRef<HTMLDivElement>(null);
+  const suggestions =
+    role === "finance"
+      ? ["Can we afford the full launch?", "What downside could change this decision?"]
+      : ["Only if we're launch-ready.", "What is the smallest reversible alternative?"];
+
+  useEffect(() => {
+    transcript.current?.scrollTo({
+      top: transcript.current.scrollHeight,
+      behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
+        ? "auto"
+        : "smooth",
+    });
+  }, [busy, role, turns.length]);
+
+  return (
+    <section className="glass p-5 sm:p-6" aria-labelledby="deliberation-title">
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <p className="text-sm font-semibold text-ink-2">Private to {roleNames[role]}</p>
+          <h2 id="deliberation-title" className="mt-2 text-h3">Deliberate before you decide</h2>
+        </div>
+        <span className="rounded-full border border-hairline px-3 py-1 text-xs text-ink-3">ADK · grounded tools</span>
+      </div>
+
+      <div
+        ref={transcript}
+        className="mt-5 max-h-80 space-y-3 overflow-y-auto pr-1"
+        aria-live="polite"
+      >
+        {turns.map((turn) => (
+          <div
+            key={turn.turnId}
+            className={`max-w-[92%] rounded-xl border px-4 py-3 text-sm leading-relaxed ${
+              turn.speaker === "keyholder"
+                ? "ml-auto border-white/30 bg-white text-on-accent"
+                : "border-hairline bg-white/6 text-ink-2"
+            }`}
+          >
+            <p>{turn.text}</p>
+            {turn.citations.length > 0 && (
+              <p className={`mt-2 font-mono text-[0.68rem] ${turn.speaker === "keyholder" ? "text-on-accent/60" : "text-ink-3"}`}>
+                {turn.citations.join(" · ")}
+              </p>
+            )}
+          </div>
+        ))}
+        {busy && <p className="text-sm text-ink-3">Checking the source ledger...</p>}
+      </div>
+
+      <div className="mt-5 flex flex-wrap gap-2">
+        {suggestions.map((suggestion) => (
+          <button
+            key={suggestion}
+            type="button"
+            disabled={busy}
+            onClick={() => send(suggestion)}
+            className="rounded-full border border-hairline px-3 py-2 text-xs text-ink-2 transition hover:border-hairline-strong hover:bg-white/8 disabled:opacity-50"
+          >
+            {suggestion}
+          </button>
+        ))}
+      </div>
+
+      <form
+        className="mt-4 flex gap-2"
+        onSubmit={(event) => {
+          event.preventDefault();
+          send();
+        }}
+      >
+        <label className="sr-only" htmlFor="deliberation-message">Message the deliberation agent</label>
+        <input
+          id="deliberation-message"
+          value={value}
+          maxLength={1000}
+          onChange={(event) => setValue(event.target.value)}
+          placeholder="Ask, challenge, or state a condition..."
+          className="min-w-0 flex-1 rounded-full border border-hairline-strong bg-[#061a4d]/70 px-4 py-3 text-sm text-ink placeholder:text-white/50 focus:border-white"
+        />
+        <button
+          type="submit"
+          disabled={busy || !value.trim()}
+          className="rounded-full bg-white px-4 py-3 text-sm font-bold text-on-accent transition hover:bg-white/90 active:translate-y-px disabled:opacity-50"
+        >
+          Send
+        </button>
+      </form>
+    </section>
+  );
+}
+
 function RoleModule({ module, view }: { module: SurfaceModule; view: DecisionView }) {
   if (module === "BudgetWaterfall") return <FinanceContext view={view} />;
   if (module === "ScenarioTable") return <CeoContext />;
@@ -455,6 +611,10 @@ export function DecisionConsole({ localDemo }: { localDemo: boolean }) {
   const [surfaceGenerator, setSurfaceGenerator] = useState<GeneratedSurfaceResponse["generator"] | null>(null);
   const [surfaceBusy, setSurfaceBusy] = useState(false);
   const [comparison, setComparison] = useState<SurfaceComparisonResponse | null>(null);
+  const [agentRun, setAgentRun] = useState<RevenueAgentResponse | null>(null);
+  const [deliberationTurns, setDeliberationTurns] = useState<DeliberationTurnView[]>([]);
+  const [deliberationInput, setDeliberationInput] = useState("");
+  const [deliberationBusy, setDeliberationBusy] = useState(false);
 
   async function loadSurface(role: Role) {
     setSurfaceBusy(true);
@@ -472,6 +632,17 @@ export function DecisionConsole({ localDemo }: { localDemo: boolean }) {
     }
   }
 
+  async function loadDeliberation() {
+    try {
+      const thread = await readJson<{ turns: DeliberationTurnView[] }>(
+        await fetch("/api/deliberation"),
+      );
+      setDeliberationTurns(thread.turns);
+    } catch {
+      setDeliberationTurns([]);
+    }
+  }
+
   useEffect(() => {
     let active = true;
     const controller = new AbortController();
@@ -485,6 +656,7 @@ export function DecisionConsole({ localDemo }: { localDemo: boolean }) {
         if (active) {
           setView(restored);
           void loadSurface(restored.viewerRole);
+          void loadDeliberation();
         }
       } catch (reason) {
         if (reason instanceof DOMException && reason.name === "AbortError") return;
@@ -516,6 +688,7 @@ export function DecisionConsole({ localDemo }: { localDemo: boolean }) {
       setLoginRole(role);
       setComparison(null);
       void loadSurface(role);
+      void loadDeliberation();
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : "Sign-in failed.");
     } finally {
@@ -537,11 +710,57 @@ export function DecisionConsole({ localDemo }: { localDemo: boolean }) {
         }),
       );
       setView(next);
-      setNotice(success);
+      setNotice(
+        command.type === "approve" && next.status === "CONFIRMED"
+          ? `${roleNames[next.viewerRole]} approved the matching version. Lease, mutation, and read-back completed automatically.`
+          : success,
+      );
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : "The operation failed closed.");
     } finally {
       setBusy(false);
+    }
+  }
+
+  async function startRevenueAgent() {
+    setBusy(true);
+    setError(null);
+    try {
+      const result = await readJson<RevenueAgentResponse>(
+        await fetch("/api/agent", { method: "POST" }),
+      );
+      setAgentRun(result);
+      setNotice(
+        result.decision.state === "PENDING"
+          ? "Revenue Agent proposed the action. Deterministic policy summoned Finance and CEO."
+          : `Revenue Agent finished with ${result.decision.state}.`,
+      );
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : "The Revenue Agent could not run.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function sendDeliberation(message = deliberationInput) {
+    const value = message.trim();
+    if (!value) return;
+    setDeliberationBusy(true);
+    setError(null);
+    try {
+      const result = await readJson<{ turns: DeliberationTurnView[] }>(
+        await fetch("/api/deliberation", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ message: value }),
+        }),
+      );
+      setDeliberationTurns(result.turns);
+      setDeliberationInput("");
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : "The deliberation agent could not answer.");
+    } finally {
+      setDeliberationBusy(false);
     }
   }
 
@@ -627,6 +846,7 @@ export function DecisionConsole({ localDemo }: { localDemo: boolean }) {
         </div>
 
         <ActionCapsule view={view} />
+        <RevenueAgentPanel run={agentRun} busy={busy} start={() => void startRevenueAgent()} />
         <Approvals view={view} />
         <LeaseAndReceipt view={view} />
       </div>
@@ -659,7 +879,7 @@ export function DecisionConsole({ localDemo }: { localDemo: boolean }) {
               <button
                 type="button"
                 disabled={busy}
-                onClick={() => run({ type: "condition", executeBefore: "2026-08-17T08:00:00Z" }, "Action v2 created. Finance v1 is now stale.")}
+                onClick={() => run({ type: "condition", executeBefore: `${view.action.businessDecision.endDate}T23:59:59Z` }, "Action v2 created. Finance v1 is now stale.")}
                 className="rounded-full bg-white px-5 py-3 font-bold text-on-accent transition hover:bg-white/90 active:translate-y-px disabled:cursor-wait disabled:opacity-60"
               >
                 Add launch guard
@@ -675,35 +895,15 @@ export function DecisionConsole({ localDemo }: { localDemo: boolean }) {
                 Approve v{view.action.version}
               </button>
             )}
-            {view.status === "FULLY_APPROVED" && (
+            {(view.status === "FULLY_APPROVED" || view.status === "LEASED") && (
               <button
                 type="button"
                 disabled={busy}
-                onClick={() => run({ type: "issue_lease" }, "Single-use ActionLease issued.")}
-                className="rounded-full bg-white px-5 py-3 font-bold text-on-accent transition hover:bg-white/90 active:translate-y-px disabled:cursor-wait disabled:opacity-60"
+                onClick={() => run({ type: "settle" }, "Protected execution resumed and confirmed.")}
+                className="rounded-full border border-hairline-strong px-5 py-3 font-semibold transition hover:bg-white/10 active:translate-y-px disabled:opacity-60"
               >
-                Issue ActionLease
+                Resume protected execution
               </button>
-            )}
-            {view.status === "LEASED" && (
-              <>
-                <button
-                  type="button"
-                  disabled={busy}
-                  onClick={() => run({ type: "execute" }, "Campaign mutation confirmed by read-back.")}
-                  className="rounded-full bg-white px-5 py-3 font-bold text-on-accent transition hover:bg-white/90 active:translate-y-px disabled:cursor-wait disabled:opacity-60"
-                >
-                  Execute once
-                </button>
-                <button
-                  type="button"
-                  disabled={busy || !view.lease}
-                  onClick={() => view.lease && run({ type: "revoke_lease", leaseId: view.lease.leaseId }, "Lease revoked. Execution is blocked.")}
-                  className="rounded-full border border-hairline-strong px-5 py-3 font-semibold transition hover:bg-white/10 active:translate-y-px disabled:opacity-60"
-                >
-                  Revoke lease
-                </button>
-              </>
             )}
             {view.status === "CONFIRMED" && (
               <button
@@ -727,6 +927,15 @@ export function DecisionConsole({ localDemo }: { localDemo: boolean }) {
             )}
           </div>
         </section>
+
+        <DeliberationPanel
+          role={view.viewerRole}
+          turns={deliberationTurns}
+          value={deliberationInput}
+          busy={deliberationBusy}
+          setValue={setDeliberationInput}
+          send={(message) => void sendDeliberation(message)}
+        />
 
         {view.surface.modules
           .filter((module) => module !== "ActionCapsule" && module !== "ConditionForm")

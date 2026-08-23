@@ -6,8 +6,14 @@ import {
   createDeliberationAgent,
   getMetric,
   projectScenario,
+  runDeliberationTurn,
   searchEvidence,
 } from "./deliberation.ts";
+import {
+  appendDeliberation,
+  newTurn,
+  readDeliberation,
+} from "./deliberation-store.ts";
 
 test("a narrow question still returns the counterevidence", () => {
   const counterIds = EVIDENCE.filter((e) => e.kind === "counterevidence").map((e) => e.factId);
@@ -47,4 +53,37 @@ test("the deliberation agent exposes exactly its three grounded tools", () => {
   const agent = createDeliberationAgent();
   const names = (agent.tools ?? []).map((tool) => (tool as { name: string }).name).sort();
   assert.deepEqual(names, ["get_metric", "project_scenario", "search_evidence"]);
+});
+
+test("a vague material condition is clarified before advice is given", async () => {
+  const reply = await runDeliberationTurn({
+    role: "ceo",
+    message: "Approve only if launch readiness is okay.",
+    history: [],
+    useModel: false,
+  });
+
+  assert.match(reply.text, /Do you mean/);
+  assert.deepEqual(reply.citations, ["f.product.readiness"]);
+  assert.equal(reply.source, "fallback");
+});
+
+test("finance receives cited budget evidence and its downside", async () => {
+  const reply = await runDeliberationTurn({
+    role: "finance",
+    message: "Can we afford this budget?",
+    history: [],
+    useModel: false,
+  });
+
+  assert.ok(reply.citations.includes("f.budget.remaining"));
+  assert.ok(reply.citations.includes("f.counter.support"));
+});
+
+test("private deliberation never crosses roles", async () => {
+  const canary = "FIN_ONLY_CANARY_TEST";
+  await appendDeliberation("finance", [newTurn("keyholder", canary, "keyholder")]);
+
+  assert.ok((await readDeliberation("finance")).some((turn) => turn.text === canary));
+  assert.ok((await readDeliberation("ceo")).every((turn) => turn.text !== canary));
 });

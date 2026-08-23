@@ -1,6 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
+import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 
 /**
@@ -21,7 +22,8 @@ const VolumetricClouds = dynamic(() => import("./VolumetricClouds"), {
   ssr: false,
 });
 
-export function SkyBackground({ volumetric = true }: { volumetric?: boolean }) {
+export function SkyBackground() {
+  const volumetric = usePathname() !== "/demo";
   const [motionOk, setMotionOk] = useState(true);
   const [small, setSmall] = useState(false);
   const [heavyOk, setHeavyOk] = useState(false);

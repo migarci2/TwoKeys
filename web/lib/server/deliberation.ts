@@ -1,8 +1,17 @@
-import { FunctionTool, LlmAgent } from "@google/adk";
+import {
+  FunctionTool,
+  InMemorySessionService,
+  isFinalResponse,
+  LlmAgent,
+  Runner,
+  stringifyContent,
+} from "@google/adk";
 import { Type } from "@google/genai";
 
 import { EVIDENCE, SCENARIOS } from "../fixture.ts";
 import type { EvidenceItem, ScenarioRow } from "../types.ts";
+import type { Role } from "./authority.ts";
+import type { DeliberationTurn } from "./deliberation-store.ts";
 
 /**
  * The deliberation agent helps one keyholder reach a decision. It is never the
@@ -123,13 +132,121 @@ Rules you may never break:
 
 The keyholder may be seeing this action for the first time and may not know the proposing agent exists. Establish what is being asked and why it reached them before asking anything of them.`;
 
-export function createDeliberationAgent() {
+export function createDeliberationAgent(role?: Role) {
   return new LlmAgent({
     name: "twokeys_deliberation",
     description:
       "Helps a single keyholder understand and decide one proposed action, grounded in cited evidence.",
     model: MODEL_ID,
-    instruction: INSTRUCTION,
+    instruction:
+      INSTRUCTION +
+      (role
+        ? `\n\nThe authenticated keyholder is ${role.toUpperCase()}. Address only that role's responsibilities and never infer or reveal another role's private conversation.`
+        : ""),
     tools: [searchEvidenceTool, getMetricTool, projectScenarioTool],
   });
+}
+
+export interface DeliberationReply {
+  text: string;
+  citations: string[];
+  source: "adk" | "fallback";
+}
+
+const KNOWN_CITATIONS = [
+  ...EVIDENCE.map((item) => item.factId),
+  ...SCENARIOS.map((row) => `s.scenario.${row.name.toLowerCase().replace(/\s+/g, "-")}`),
+];
+
+function citationsIn(text: string): string[] {
+  return KNOWN_CITATIONS.filter((factId) => text.includes(factId));
+}
+
+function validateReply(text: string): string {
+  const value = text.trim();
+  if (!value || value.length > 1_200) throw new Error("The deliberation reply is invalid.");
+  if (/FIN_ONLY_CANARY_7K2|CEO_ONLY_CANARY_M9Q/.test(value)) {
+    throw new Error("The deliberation reply contained role-private canary data.");
+  }
+  return value;
+}
+
+function fallbackReply(role: Role, message: string): DeliberationReply {
+  const normalized = message.toLowerCase();
+  let text: string;
+  if (
+    role === "ceo" &&
+    /(only if|provided|condition|launch.ready|readiness)/.test(normalized) &&
+    !/(green.*before|before.*green)/.test(normalized)
+  ) {
+    text =
+      "Do you mean Product readiness must remain GREEN at execution, and should activation also be limited to the approved campaign window? [f.product.readiness]";
+  } else if (role === "ceo" && /green/.test(normalized) && /before/.test(normalized)) {
+    text =
+      "That is concrete: require Product readiness to remain GREEN and activation to occur before the campaign window closes. The interface can record it as a material condition, which will create a new version and stale prior consent. [f.product.readiness]";
+  } else if (/(pilot|alternative|revers|opportunity)/.test(normalized)) {
+    const pilot = projectScenario("Reversible pilot, 4 days");
+    text = `The smallest reversible option is the four-day pilot: EUR ${pilot.downsideEur.toLocaleString("en-GB")} downside and EUR ${pilot.upsideEur.toLocaleString("en-GB")} upside. It tests demand before the full commitment. [${pilot.factId}]`;
+  } else if (/(budget|afford|money|cost)/.test(normalized)) {
+    const budget = getMetric("f.budget.remaining");
+    const counter = getMetric("f.counter.support");
+    text = `The frozen Finance record shows ${budget.value} unallocated. The full campaign uses EUR 30,000, while support capacity remains a downside: ${counter.value}. [${budget.factId}] [${counter.factId}]`;
+  } else {
+    const facts = searchEvidence(message).slice(0, 3);
+    text = facts.length
+      ? `The evidence most relevant to that question is: ${facts.map((fact) => `${fact.label}: ${fact.value} [${fact.factId}]`).join("; ")}.`
+      : "I cannot support an answer from the current evidence. Ask about budget, readiness, downside, or a named scenario.";
+  }
+  return { text, citations: citationsIn(text), source: "fallback" };
+}
+
+export async function runDeliberationTurn(input: {
+  role: Role;
+  message: string;
+  history: DeliberationTurn[];
+  useModel?: boolean;
+}): Promise<DeliberationReply> {
+  const message = input.message.trim();
+  if (!message || message.length > 1_000) throw new Error("Message must be 1–1000 characters.");
+  const useModel = input.useModel ?? Boolean(process.env.GEMINI_API_KEY);
+  if (!useModel) {
+    if (process.env.NODE_ENV === "production") {
+      throw new Error("GEMINI_API_KEY is required for deliberation in production.");
+    }
+    return fallbackReply(input.role, message);
+  }
+
+  const history = input.history.slice(-8).map((turn) => ({
+    speaker: turn.speaker,
+    text: turn.text,
+  }));
+  const prompt = [
+    `Authenticated role: ${input.role}.`,
+    `Recent private conversation: ${JSON.stringify(history)}.`,
+    `Keyholder message: ${JSON.stringify(message)}.`,
+    "Use the tools for factual claims. Keep the answer under 140 words and include each supporting factId in square brackets.",
+  ].join("\n");
+  const sessionService = new InMemorySessionService();
+  const runner = new Runner({
+    appName: "twokeys_deliberation",
+    agent: createDeliberationAgent(input.role),
+    sessionService,
+  });
+  const sessionId = `deliberation-${crypto.randomUUID()}`;
+  await sessionService.createSession({
+    appName: "twokeys_deliberation",
+    userId: input.role,
+    sessionId,
+  });
+  let answer = "";
+  for await (const event of runner.runAsync({
+    userId: input.role,
+    sessionId,
+    newMessage: { role: "user", parts: [{ text: prompt }] },
+    abortSignal: AbortSignal.timeout(25_000),
+  })) {
+    if (isFinalResponse(event)) answer = stringifyContent(event);
+  }
+  const text = validateReply(answer);
+  return { text, citations: citationsIn(text), source: "adk" };
 }
