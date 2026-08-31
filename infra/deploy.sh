@@ -2,29 +2,42 @@
 set -euo pipefail
 
 : "${GCP_PROJECT_ID:?Set GCP_PROJECT_ID to a billing-enabled project}"
-: "${GOOGLE_ADS_CONFIGURATION_SNAPSHOT_HASH:?Capture and set the approved Google Ads snapshot hash}"
 
 DEPLOY_ONLY="${DEPLOY_ONLY:-false}"
+DEPLOY_PROFILE="${DEPLOY_PROFILE:-production}"
 GCP_REGION="${GCP_REGION:-europe-west1}"
 FIRESTORE_LOCATION="${FIRESTORE_LOCATION:-eur3}"
 SERVICE_NAME="${SERVICE_NAME:-twokeys}"
 ARTIFACT_REPOSITORY="${ARTIFACT_REPOSITORY:-twokeys}"
 RUNTIME_SERVICE_ACCOUNT="twokeys-runtime@${GCP_PROJECT_ID}.iam.gserviceaccount.com"
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-SECRET_IDS=(
-  twokeys-session-secret
-  twokeys-finance-access-code
-  twokeys-ceo-access-code
-  twokeys-agent-seam-key
-  twokeys-gemini-api-key
-  twokeys-google-ads-developer-token
-  twokeys-google-ads-client-id
-  twokeys-google-ads-client-secret
-  twokeys-google-ads-refresh-token
-  twokeys-google-ads-customer-id
-  twokeys-google-ads-campaign-id
-  twokeys-google-ads-login-customer-id
-)
+case "${DEPLOY_PROFILE}" in
+  demo)
+    GOOGLE_ADS_CONFIGURATION_SNAPSHOT_HASH="${GOOGLE_ADS_CONFIGURATION_SNAPSHOT_HASH:-sha256:fec639ba4a6879fd7a39afbf543df5fb5c1ba8353b5a7b014aad499bb0743daf}"
+    SECRET_IDS=(twokeys-session-secret twokeys-gemini-api-key)
+    ;;
+  production)
+    : "${GOOGLE_ADS_CONFIGURATION_SNAPSHOT_HASH:?Capture and set the approved Google Ads snapshot hash}"
+    SECRET_IDS=(
+      twokeys-session-secret
+      twokeys-finance-access-code
+      twokeys-ceo-access-code
+      twokeys-agent-seam-key
+      twokeys-gemini-api-key
+      twokeys-google-ads-developer-token
+      twokeys-google-ads-client-id
+      twokeys-google-ads-client-secret
+      twokeys-google-ads-refresh-token
+      twokeys-google-ads-customer-id
+      twokeys-google-ads-campaign-id
+      twokeys-google-ads-login-customer-id
+    )
+    ;;
+  *)
+    echo "DEPLOY_PROFILE must be 'demo' or 'production'." >&2
+    exit 1
+    ;;
+esac
 
 if [[ "${DEPLOY_ONLY}" != "true" && "${DEPLOY_ONLY}" != "false" ]]; then
   echo "DEPLOY_ONLY must be true or false." >&2
@@ -136,10 +149,16 @@ if [[ "${DEPLOY_ONLY}" == "false" ]]; then
   gcloud builds submit "${ROOT_DIR}/web" --tag="${IMAGE}" --project="${GCP_PROJECT_ID}"
 fi
 
-RUN_ENV_VARS="STATE_BACKEND=firestore,EXECUTOR_MODE=google_ads,FIRESTORE_DATABASE_ID=(default),GEMINI_MODEL=gemini-3.7-flash,GOOGLE_ADS_API_VERSION=v25,GOOGLE_ADS_CONFIGURATION_SNAPSHOT_HASH=${GOOGLE_ADS_CONFIGURATION_SNAPSHOT_HASH},APP_ORIGIN=https://twokeys.migarci2.dev"
+if [[ "${DEPLOY_PROFILE}" == "demo" ]]; then
+  RUN_ENV_VARS="STATE_BACKEND=firestore,EXECUTOR_MODE=simulated,TWOKEYS_PUBLIC_DEMO=true,FIRESTORE_DATABASE_ID=(default),GEMINI_MODEL=gemini-3.7-flash,GOOGLE_ADS_CONFIGURATION_SNAPSHOT_HASH=${GOOGLE_ADS_CONFIGURATION_SNAPSHOT_HASH},APP_ORIGIN=https://twokeys.migarci2.dev"
+  RUN_SECRETS="SESSION_SECRET=twokeys-session-secret:latest,GEMINI_API_KEY=twokeys-gemini-api-key:latest"
+else
+  RUN_ENV_VARS="STATE_BACKEND=firestore,EXECUTOR_MODE=google_ads,TWOKEYS_PUBLIC_DEMO=false,FIRESTORE_DATABASE_ID=(default),GEMINI_MODEL=gemini-3.7-flash,GOOGLE_ADS_API_VERSION=v25,GOOGLE_ADS_CONFIGURATION_SNAPSHOT_HASH=${GOOGLE_ADS_CONFIGURATION_SNAPSHOT_HASH},APP_ORIGIN=https://twokeys.migarci2.dev"
+  RUN_SECRETS="SESSION_SECRET=twokeys-session-secret:latest,FINANCE_ACCESS_CODE=twokeys-finance-access-code:latest,CEO_ACCESS_CODE=twokeys-ceo-access-code:latest,AGENT_SEAM_KEY=twokeys-agent-seam-key:latest,GEMINI_API_KEY=twokeys-gemini-api-key:latest,GOOGLE_ADS_DEVELOPER_TOKEN=twokeys-google-ads-developer-token:latest,GOOGLE_ADS_CLIENT_ID=twokeys-google-ads-client-id:latest,GOOGLE_ADS_CLIENT_SECRET=twokeys-google-ads-client-secret:latest,GOOGLE_ADS_REFRESH_TOKEN=twokeys-google-ads-refresh-token:latest,GOOGLE_ADS_CUSTOMER_ID=twokeys-google-ads-customer-id:latest,GOOGLE_ADS_CAMPAIGN_ID=twokeys-google-ads-campaign-id:latest,GOOGLE_ADS_LOGIN_CUSTOMER_ID=twokeys-google-ads-login-customer-id:latest"
+fi
 DEPLOY_ACCESS=(--allow-unauthenticated)
 DEPLOY_ENV=(--set-env-vars="${RUN_ENV_VARS}")
-DEPLOY_SECRETS=(--set-secrets="SESSION_SECRET=twokeys-session-secret:latest,FINANCE_ACCESS_CODE=twokeys-finance-access-code:latest,CEO_ACCESS_CODE=twokeys-ceo-access-code:latest,AGENT_SEAM_KEY=twokeys-agent-seam-key:latest,GEMINI_API_KEY=twokeys-gemini-api-key:latest,GOOGLE_ADS_DEVELOPER_TOKEN=twokeys-google-ads-developer-token:latest,GOOGLE_ADS_CLIENT_ID=twokeys-google-ads-client-id:latest,GOOGLE_ADS_CLIENT_SECRET=twokeys-google-ads-client-secret:latest,GOOGLE_ADS_REFRESH_TOKEN=twokeys-google-ads-refresh-token:latest,GOOGLE_ADS_CUSTOMER_ID=twokeys-google-ads-customer-id:latest,GOOGLE_ADS_CAMPAIGN_ID=twokeys-google-ads-campaign-id:latest,GOOGLE_ADS_LOGIN_CUSTOMER_ID=twokeys-google-ads-login-customer-id:latest")
+DEPLOY_SECRETS=(--set-secrets="${RUN_SECRETS}")
 if [[ "${DEPLOY_ONLY}" == "true" ]]; then
   DEPLOY_ACCESS=()
   DEPLOY_ENV=(--update-env-vars="${RUN_ENV_VARS}")

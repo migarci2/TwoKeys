@@ -25,6 +25,8 @@ npm run lint
 npm run build -- --webpack
 ```
 
-Production deliberately refuses the memory store, simulated executor, missing
-Gemini key and weak session configuration. Deployment and required Secret
-Manager names live in [`../infra/deploy.sh`](../infra/deploy.sh).
+Production deliberately refuses the memory store, missing Gemini key and weak
+session configuration. The public demo profile permits the simulated executor
+only when `TWOKEYS_PUBLIC_DEMO=true`, so anonymous judges cannot trigger a live
+Ads mutation. Deployment and required Secret Manager names live in
+[`../infra/deploy.sh`](../infra/deploy.sh).

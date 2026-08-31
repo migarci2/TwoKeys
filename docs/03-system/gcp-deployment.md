@@ -18,13 +18,28 @@ and per-secret Secret Manager access. The public UI is protected by signed,
 role-scoped sessions; Google Ads credentials and real resource IDs stay server
 side.
 
+For the public hackathon URL, use the `demo` profile. It keeps Gemini and
+Firestore live but replaces Google Ads with the labelled simulated gateway and
+allows code-free role switching. The server enables that public access only
+while `EXECUTOR_MODE=simulated`, so the profile cannot expose a live Ads
+executor by configuration accident.
+
 ## Required setup
 
 Use a new billing-enabled project. The currently selected `Gemini Project`
 contains unrelated Memoo services and has billing disabled, so the deployment
 script deliberately refuses to use it.
 
-Create one version for each secret named in `infra/deploy.sh`. The Google Ads
+For the lightweight public demo, create only `twokeys-session-secret` and
+`twokeys-gemini-api-key`, then run:
+
+```bash
+export GCP_PROJECT_ID=your-billing-enabled-project
+DEPLOY_PROFILE=demo ./infra/deploy.sh
+```
+
+For a real test-account deployment, create one version for every production
+secret named in `infra/deploy.sh`. The Google Ads
 values must point to an already complete, paused test-account campaign. Capture
 the snapshot hash from that exact campaign with `npm run ads:snapshot` in
 `web/`, then export it as
@@ -64,10 +79,11 @@ TwoKeys repository, Cloud Run developer on the existing TwoKeys service,
 Service Usage consumer, and permission to run as the existing
 `twokeys-runtime` account. It does not create a service-account key.
 
-Add the three values printed by the script plus
-`GOOGLE_ADS_CONFIGURATION_SNAPSHOT_HASH` as GitHub repository variables under
+Add the three values printed by the script plus `DEPLOY_PROFILE` as GitHub
+repository variables under
 **Settings -> Secrets and variables -> Actions -> Variables**. The digest is a
-configuration identifier, not a credential. Optional variables are
+configuration identifier, not a credential, and is required only for the
+`production` profile. Optional variables are
 `GCP_REGION`, `SERVICE_NAME`, and `ARTIFACT_REPOSITORY`; their defaults match
 `infra/deploy.sh`.
 

@@ -139,7 +139,7 @@ dedicated runtime service account. Agents can connect through HTTP, MCP, or the
 Google ADK adapter. The deployment path also supports keyless GitHub Actions
 authentication through Workload Identity Federation.
 
-![TwoKeys architecture: dual approval before external execution](../../diagrams/twokeys-architecture.png)
+![TwoKeys architecture: dual approval before external execution](https://raw.githubusercontent.com/migarci2/TwoKeys/main/diagrams/twokeys-architecture.png)
 
 ## Challenges we ran into
 
