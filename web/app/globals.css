@@ -56,6 +56,7 @@
   --bezel: #0b1a3c;
 
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
 }
 
 @theme inline {
@@ -308,6 +309,266 @@ body {
   }
 }
 
+::view-transition-old(.demo-screen-forward) {
+  animation: 420ms var(--ease-out) both demo-screen-out;
+}
+
+::view-transition-new(.demo-screen-forward) {
+  animation: 700ms var(--ease-out) both demo-screen-in;
+}
+
+@keyframes demo-screen-out {
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes demo-screen-in {
+  from {
+    clip-path: circle(8% at 50% 50%);
+    opacity: 0.72;
+    transform: scale(1.035);
+  }
+  to {
+    clip-path: circle(150vmax at 50% 50%);
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.demo-unlock-sequence {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  isolation: isolate;
+  pointer-events: none;
+  animation: 1150ms linear both demo-unlock-sequence;
+}
+
+.demo-unlock-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgb(4 20 61 / 0.94);
+  opacity: 0;
+  animation: 1150ms var(--ease-out) both demo-unlock-backdrop;
+}
+
+.demo-unlock-stage {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  width: min(80vw, 32rem);
+  height: 16rem;
+  place-items: center;
+}
+
+.demo-unlock-pair {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  animation: 1150ms var(--ease-in-out) both demo-unlock-turn;
+  will-change: transform;
+}
+
+.demo-unlock-key {
+  position: absolute;
+  width: 7rem;
+  color: white;
+  opacity: 0;
+  will-change: transform, opacity;
+}
+
+.demo-unlock-key--left {
+  animation: 1150ms var(--ease-in-out) both demo-unlock-key-left;
+}
+
+.demo-unlock-key--right {
+  animation: 1150ms var(--ease-in-out) both demo-unlock-key-right;
+}
+
+.demo-unlock-ring {
+  position: absolute;
+  display: grid;
+  width: 10rem;
+  aspect-ratio: 1;
+  place-items: center;
+  border: 1px solid rgb(255 255 255 / 0.72);
+  border-radius: 999px;
+  opacity: 0;
+  animation: 1150ms var(--ease-in-out) both demo-unlock-ring;
+}
+
+.demo-unlock-ring span {
+  width: 7rem;
+  aspect-ratio: 1;
+  border: 1px dashed rgb(255 255 255 / 0.5);
+  border-radius: inherit;
+}
+
+.demo-unlock-label {
+  position: absolute;
+  bottom: 0;
+  font-size: 0.75rem;
+  font-weight: 900;
+  letter-spacing: 0.18em;
+  opacity: 0;
+  animation: 1150ms var(--ease-out) both demo-unlock-label;
+}
+
+.demo-unlock-flash {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: 2;
+  width: 10rem;
+  aspect-ratio: 1;
+  border-radius: 999px;
+  background: white;
+  opacity: 0;
+  animation: 1150ms var(--ease-in-out) both demo-unlock-flash;
+  will-change: transform, opacity;
+}
+
+@keyframes demo-unlock-sequence {
+  from {
+    opacity: 0.999;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes demo-unlock-backdrop {
+  0% {
+    opacity: 0;
+  }
+  18%,
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes demo-unlock-key-left {
+  0% {
+    opacity: 0;
+    transform: translate3d(-40vw, 0, 0) scale(0.9);
+  }
+  14% {
+    opacity: 1;
+  }
+  46%,
+  70% {
+    opacity: 1;
+    transform: translate3d(-2.5rem, 0, 0) scale(1);
+  }
+  86%,
+  100% {
+    opacity: 0;
+    transform: translate3d(-2.5rem, 0, 0) scale(1.2);
+  }
+}
+
+@keyframes demo-unlock-key-right {
+  0% {
+    opacity: 0;
+    transform: translate3d(40vw, 0, 0) scale(0.9);
+  }
+  14% {
+    opacity: 1;
+  }
+  46%,
+  70% {
+    opacity: 1;
+    transform: translate3d(2.5rem, 0, 0) scale(1);
+  }
+  86%,
+  100% {
+    opacity: 0;
+    transform: translate3d(2.5rem, 0, 0) scale(1.2);
+  }
+}
+
+@keyframes demo-unlock-turn {
+  0%,
+  48% {
+    transform: rotate(0deg);
+  }
+  70%,
+  100% {
+    transform: rotate(90deg) scale(0.94);
+  }
+}
+
+@keyframes demo-unlock-ring {
+  0%,
+  30% {
+    opacity: 0;
+    transform: scale(0.9) rotate(0deg);
+  }
+  46% {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+  70% {
+    opacity: 1;
+    transform: scale(0.95) rotate(90deg);
+  }
+  84%,
+  100% {
+    opacity: 0;
+    transform: scale(1.5) rotate(150deg);
+  }
+}
+
+@keyframes demo-unlock-label {
+  0%,
+  22% {
+    opacity: 0;
+    transform: translate3d(0, 1rem, 0);
+  }
+  38%,
+  62% {
+    opacity: 1;
+    transform: none;
+  }
+  76%,
+  100% {
+    opacity: 0;
+    transform: translate3d(0, -0.5rem, 0);
+  }
+}
+
+@keyframes demo-unlock-flash {
+  0%,
+  68% {
+    opacity: 0;
+    transform: translate3d(-50%, -50%, 0) scale(0.9);
+  }
+  72% {
+    opacity: 1;
+    transform: translate3d(-50%, -50%, 0) scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(-50%, -50%, 0) scale(30);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(.demo-screen-forward),
+  ::view-transition-new(.demo-screen-forward) {
+    animation: 120ms var(--ease-out) both page-fade-out !important;
+  }
+
+  ::view-transition-new(.demo-screen-forward) {
+    animation-name: page-fade-in !important;
+  }
+}
+
 @keyframes page-fade-out {
   to {
     opacity: 0;
@@ -422,15 +683,15 @@ body {
   }
 }
 
-@utility sail {
-  animation: sail 150s ease-in-out infinite alternate;
-}
-
 /* Applied to the active frame only; children pick up a stagger from an index
    variable so the panels land in order. */
 @utility composing {
   animation: compose 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
   animation-delay: calc(var(--i, 0) * 70ms);
+}
+
+@utility sail {
+  animation: sail 150s ease-in-out infinite alternate;
 }
 
 @utility pulse-dot {

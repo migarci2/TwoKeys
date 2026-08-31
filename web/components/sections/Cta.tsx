@@ -18,7 +18,7 @@ export function Cta() {
             transitionTypes={["nav-forward"]}
             className="rounded-btn bg-accent px-7 py-4 font-medium text-on-accent transition hover:opacity-90"
           >
-            Watch the demo
+            Open the demo
           </Link>
         </div>
       </Container>

@@ -57,7 +57,7 @@ export function Hero() {
               transitionTypes={["nav-forward"]}
               className="rounded-btn border border-hairline-strong px-6 py-3.5 font-medium transition hover:bg-glass"
             >
-              Watch the demo
+              Open the demo
             </Link>
           </div>
         </div>
