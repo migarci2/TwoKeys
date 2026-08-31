@@ -27,6 +27,7 @@ docs/
 9. [GCP deployment](03-system/gcp-deployment.md)
 10. [Claims and evidence](04-validation/claims.md)
 11. [48-hour plan](05-delivery/plan-48h.md)
+12. [Google Cloud deployment evidence](05-delivery/gcp-deployment-evidence.md)
 
 The [four-minute script](02-demo/four-minute-script.md) is a production artifact,
 not a substitute for the product and system documents.

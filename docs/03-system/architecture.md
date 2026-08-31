@@ -1,8 +1,8 @@
 # System architecture
 
-**Status:** implemented locally in the `web` application. Deployment to a
-billing-enabled GCP project and the live Google Ads test-account proof remain
-pending.
+**Status:** implemented and deployed to Cloud Run with Firestore and Gemini.
+The live Google Ads test-account proof remains pending; the public demo uses the
+simulated executor.
 
 ## Design goal
 
@@ -49,6 +49,7 @@ flowchart TD
 Keep the deployment boring:
 
 - one Cloud Run application for the backend, renderer, approval API, and executor;
+- one Cloudflare Worker as the TLS custom-domain proxy;
 - one Firestore database;
 - Cloud Scheduler only if scheduled monitoring is implemented;
 - Secret Manager for Google Ads credentials and other server secrets;

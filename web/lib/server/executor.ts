@@ -4,6 +4,7 @@ import {
   type ActionVersionRecord,
   type CampaignStatus,
 } from "./authority.ts";
+import { publicDemoMode } from "./demo-mode.ts";
 
 export interface CampaignSnapshot {
   resourceName: string;
@@ -292,7 +293,7 @@ export function getCampaignGateway(): CampaignGateway {
   const mode =
     process.env.EXECUTOR_MODE || (process.env.NODE_ENV === "production" ? "google_ads" : "simulated");
   if (mode === "simulated") {
-    if (process.env.NODE_ENV === "production") {
+    if (process.env.NODE_ENV === "production" && !publicDemoMode()) {
       throw new Error("EXECUTOR_MODE=simulated is forbidden in production.");
     }
     globalThis.__twoKeysSimulatedGateway ??= new SimulatedCampaignGateway();

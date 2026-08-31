@@ -1,6 +1,7 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
 
 import { REQUIRED_ROLES, type Role } from "./authority.ts";
+import { publicDemoMode } from "./demo-mode.ts";
 
 export const SESSION_COOKIE = "twokeys_session";
 const SESSION_SECONDS = 60 * 60;
@@ -99,7 +100,10 @@ function codeDigest(value: string): Buffer {
 }
 
 export function accessCodeIsValid(role: Role, candidate: string): boolean {
-  if (process.env.NODE_ENV !== "production" && process.env.LOCAL_DEMO_AUTH === "true") {
+  if (
+    (process.env.NODE_ENV !== "production" && process.env.LOCAL_DEMO_AUTH === "true") ||
+    publicDemoMode()
+  ) {
     return true;
   }
   const expected =

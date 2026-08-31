@@ -179,7 +179,7 @@ The intended Google Cloud shape is:
 
 The same application serves the decision UI, approval API, authority kernel, agent seam, and executor. Firestore transactions serialize competing approval and lease operations.
 
-The local application, deterministic kernel, adapters, and automated checks are implemented. A live Cloud Run deployment and retained proof of the real Google Ads test-account mutation are still pending, so I do not present them as completed results.
+The application is live on Cloud Run with Firestore and Gemini at [twokeys.migarci2.dev/demo](https://twokeys.migarci2.dev/demo). The public profile uses simulated Google Ads execution, so retained proof of a real test-account mutation is still pending and is not presented as a completed result.
 
 ## What I learned
 

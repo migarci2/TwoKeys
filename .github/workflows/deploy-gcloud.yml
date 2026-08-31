@@ -25,6 +25,7 @@ jobs:
       GCP_PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
       GCP_WORKLOAD_IDENTITY_PROVIDER: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
       GCP_DEPLOY_SERVICE_ACCOUNT: ${{ vars.GCP_DEPLOY_SERVICE_ACCOUNT }}
+      DEPLOY_PROFILE: ${{ vars.DEPLOY_PROFILE || 'production' }}
       GOOGLE_ADS_CONFIGURATION_SNAPSHOT_HASH: ${{ vars.GOOGLE_ADS_CONFIGURATION_SNAPSHOT_HASH }}
       GCP_REGION: ${{ vars.GCP_REGION || 'europe-west1' }}
       SERVICE_NAME: ${{ vars.SERVICE_NAME || 'twokeys' }}
@@ -36,13 +37,18 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          for name in GCP_PROJECT_ID GCP_WORKLOAD_IDENTITY_PROVIDER GCP_DEPLOY_SERVICE_ACCOUNT GOOGLE_ADS_CONFIGURATION_SNAPSHOT_HASH; do
+          for name in GCP_PROJECT_ID GCP_WORKLOAD_IDENTITY_PROVIDER GCP_DEPLOY_SERVICE_ACCOUNT; do
             [[ -n "${!name}" ]] || { echo "Missing GitHub Actions variable: ${name}" >&2; exit 1; }
           done
-          [[ "${GOOGLE_ADS_CONFIGURATION_SNAPSHOT_HASH}" =~ ^sha256:[a-f0-9]{64}$ ]] || {
-            echo "GOOGLE_ADS_CONFIGURATION_SNAPSHOT_HASH must be a SHA-256 digest." >&2
-            exit 1
+          [[ "${DEPLOY_PROFILE}" == "demo" || "${DEPLOY_PROFILE}" == "production" ]] || {
+            echo "DEPLOY_PROFILE must be demo or production." >&2; exit 1;
           }
+          if [[ "${DEPLOY_PROFILE}" == "production" ]]; then
+            [[ "${GOOGLE_ADS_CONFIGURATION_SNAPSHOT_HASH}" =~ ^sha256:[a-f0-9]{64}$ ]] || {
+              echo "GOOGLE_ADS_CONFIGURATION_SNAPSHOT_HASH must be a SHA-256 digest." >&2
+              exit 1
+            }
+          fi
 
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
         with:

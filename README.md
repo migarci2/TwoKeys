@@ -38,6 +38,8 @@ Agent -> propose action -> policy resolves owners -> people decide
 
 ## Demo
 
+**Live demo:** [twokeys.migarci2.dev/demo](https://twokeys.migarci2.dev/demo)
+
 The hackathon scenario starts with a Revenue Agent proposing a 14-day,
 EUR 30,000 Google Ads campaign:
 
@@ -123,10 +125,10 @@ examples for supported agent harnesses. See
 - automated coverage for authority, replay, expiry, revocation, isolation,
   adaptation, integrations, and failure-closed behavior
 
-The local application and automated suite are implemented and passing. A live
-Cloud Run deployment, the real Google Ads test-account mutation, and published
-benchmark artifacts remain pending. TwoKeys is a hackathon build, not a
-production-ready authorization system.
+The application is deployed on Cloud Run with live Firestore persistence and
+Gemini-generated role surfaces. The real Google Ads test-account mutation and
+published benchmark artifacts remain pending. TwoKeys is a hackathon build, not
+a production-ready authorization system.
 
 ## Core invariant
 
@@ -151,5 +153,6 @@ calculations, hashes, approval validity, lease consumption, and execution.
 | [`docs/03-system/`](docs/03-system/) | Architecture, contracts, UI, integrations, and deployment |
 | [`docs/04-validation/`](docs/04-validation/) | Benchmark contract and claims ledger |
 | [`docs/05-delivery/project-story.md`](docs/05-delivery/project-story.md) | Devpost Project Story draft with GIF slots |
+| [`docs/05-delivery/gcp-deployment-evidence.md`](docs/05-delivery/gcp-deployment-evidence.md) | Live Google Cloud deployment record and canary evidence |
 
 Start with the [documentation map](docs/README.md) for the full project record.
