@@ -1,6 +1,5 @@
 "use client";
 
-import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
 
 /**
@@ -8,23 +7,15 @@ import { useEffect, useState } from "react";
  *
  * Two layers. The fixed footage carries the colour and the slow drift: Seedance
  * 2.5 at 720p, upscaled by Topaz to 1080p with 2x frame-interpolated slow
- * motion, then ping-ponged so the 32s loop has no seam. Over it, on desktop
- * only, sit volumetric clouds.
+ * motion, then ping-ponged so the 32s loop has no seam. Two local cloud cut-outs
+ * sail over it, so the effect does not depend on WebGL or a remote texture.
  *
- * The WebGL layer is the expensive part, so it is gated three ways: lazily
- * imported so it never blocks first paint, mounted only above `lg` where there
- * is both the room and the GPU budget for it, and skipped entirely when the
- * reader has asked for reduced motion. Phones keep the video sky on its own.
+ * Motion is skipped entirely when the reader has asked for reduced motion.
  */
-
-const VolumetricClouds = dynamic(() => import("./VolumetricClouds"), {
-  ssr: false,
-});
 
 export function SkyBackground({ volumetric = true }: { volumetric?: boolean }) {
   const [motionOk, setMotionOk] = useState(true);
   const [small, setSmall] = useState(false);
-  const [heavyOk, setHeavyOk] = useState(false);
 
   useEffect(() => {
     const motion = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -32,10 +23,6 @@ export function SkyBackground({ volumetric = true }: { volumetric?: boolean }) {
     const read = () => {
       setMotionOk(!motion.matches);
       setSmall(phone.matches);
-      // Clouds everywhere now, phones included: the volumetric ones stay
-      // readable at small sizes in a way the image cut-outs did not. Reduced
-      // motion is still the one hard stop.
-      setHeavyOk(!motion.matches);
     };
     read();
 
@@ -82,9 +69,30 @@ export function SkyBackground({ volumetric = true }: { volumetric?: boolean }) {
           actually saw. */}
       <div className="absolute inset-0 bg-[var(--sky-tint)] mix-blend-multiply" />
 
-      {volumetric && heavyOk && (
-        <div className="absolute inset-0 opacity-70">
-          <VolumetricClouds small={small} />
+      {volumetric && motionOk && (
+        <div className="absolute inset-0 overflow-hidden">
+          <div
+            className={`absolute bg-contain bg-center bg-no-repeat opacity-[0.16] ${
+              small
+                ? "-left-[96vw] top-[14vh] h-[38vh] w-[145vw]"
+                : "-left-[42vw] top-[12vh] h-[50vh] w-[72vw]"
+            }`}
+            style={{
+              backgroundImage: "url('/sky/cloud1.webp')",
+              animation: "sail 60s linear -20s infinite alternate",
+            }}
+          />
+          <div
+            className={`absolute bg-contain bg-center bg-no-repeat opacity-[0.14] ${
+              small
+                ? "-right-[102vw] top-[48vh] h-[32vh] w-[150vw]"
+                : "-right-[48vw] top-[50vh] h-[40vh] w-[78vw]"
+            }`}
+            style={{
+              backgroundImage: "url('/sky/cloud2.webp')",
+              animation: "sail 84s linear -50s infinite alternate-reverse",
+            }}
+          />
         </div>
       )}
 

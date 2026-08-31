@@ -67,7 +67,7 @@ Seven logical components are enough. They do not need to be seven services.
 | 4 | Role Surface Generator | Two isolated Gemini calls select and order allowlisted A2UI components against server-owned data references |
 | 5 | Trusted Renderer and Approval API | Web UI, schema validation, authentication, deterministic Action Capsule, condition form, and approval endpoints |
 | 6 | ActionLease Gate and Ads Executor | Revalidates authority, consumes one lease atomically, reads the Ads resource, verifies its snapshot, performs one status mutation, and reads back state |
-| 7 | Receipt and Evaluation Harness | Stores external result metadata and runs authority, fidelity, privacy, replay, and adaptation fixtures |
+| 7 | Receipt and Evaluation Harness | Stores external result metadata and runs authority, fidelity, privacy, replay, adaptation, and Gemma evidence-screen fixtures |
 
 ## Deployment shape
 
@@ -175,6 +175,11 @@ measure `medium` for evidence interpretation only if it improves the frozen eval
 Do not design around an unverified fixed throughput number. End-to-end latency
 also includes time to first token, reasoning, Firestore, validation, rendering,
 Google Ads, and read-back.
+
+Gemma 4 runs only in the evaluation lane as an advisory screen over frozen
+evidence fixtures. It classifies prompt-injection and personal-data signals for
+the benchmark, but its output never changes policy, approvals, leases, or
+execution.
 
 ## Related
 

@@ -1,0 +1,35 @@
+graph TD
+    I["Evidence + agent inputs<br/>Google ADK / HTTP / MCP"]
+    C["Cloud Run control plane<br/>Revenue Watcher + Decision Kernel"]
+    F[("Firestore<br/>canonical state + private role memory")]
+    U["Decision surfaces<br/>Gemini 3.7 Flash + validated A2UI"]
+    K["Independent keyholders<br/>Finance + CEO"]
+    L["Authority gate<br/>revalidation + single-use ActionLease"]
+    S["Secret Manager<br/>server-only credentials"]
+    A["Google Ads test account<br/>PAUSED to ENABLED"]
+    R["Fresh read-back<br/>receipt + evaluation harness"]
+    M["Gemma 4 evidence screen<br/>advisory benchmark only"]
+
+    I -->|facts + source IDs| C
+    C -->|canonical action + hashes| F
+    F -->|role-scoped context| U
+    U -->|same facts, different responsibilities| K
+    K -->|two current approvals| L
+    F -->|action / evidence / policy hashes| L
+    S -->|credentials never reach model or browser| L
+    L -->|one authorized mutation| A
+    A -->|verify observed state| R
+    I -.->|frozen benign / hostile fixtures| M
+    M -.->|verdict cannot grant authority| R
+
+    classDef trusted fill:#0b3b68,stroke:#0b3b68,color:#ffffff,stroke-width:2px;
+    classDef state fill:#e8f1ff,stroke:#1769e0,color:#082642,stroke-width:2px;
+    classDef human fill:#fff4d6,stroke:#d88900,color:#4b3100,stroke-width:2px;
+    classDef model fill:#f1eaff,stroke:#805ad5,color:#281746,stroke-width:2px;
+    classDef external fill:#eaf8f1,stroke:#1f8a5b,color:#103d2c,stroke-width:2px;
+
+    class C,L,R trusted;
+    class F,S state;
+    class K human;
+    class U,M model;
+    class I,A external;

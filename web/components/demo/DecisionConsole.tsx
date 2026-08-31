@@ -19,16 +19,16 @@ type Command =
   | { type: "reconcile" }
   | { type: "revoke_lease"; leaseId: string };
 
-const roleNames: Record<Role, string> = { finance: "Finance", ceo: "CEO" };
+const roleNames: Record<Role, string> = { finance: "Ana · Finance", ceo: "Marco · CEO" };
 
 const statusText: Record<DecisionView["status"], string> = {
-  PENDING_KEYS: "Waiting for both keys",
-  PARTIALLY_APPROVED: "One key held",
-  STALE: "Previous approval is stale",
-  FULLY_APPROVED: "Both keys match",
-  LEASED: "Execution lease ready",
-  CONSUMED: "Lease consumed",
-  CONFIRMED: "Campaign confirmed enabled",
+  PENDING_KEYS: "Waiting for both people",
+  PARTIALLY_APPROVED: "1 of 2 approved",
+  STALE: "Plan changed · approve again",
+  FULLY_APPROVED: "2 of 2 approved",
+  LEASED: "Ready to launch once",
+  CONSUMED: "Launch sent · checking",
+  CONFIRMED: "Campaign is on",
 };
 
 async function readJson<T>(response: Response): Promise<T> {
@@ -91,10 +91,10 @@ function Login({
 }) {
   return (
     <div className="mx-auto max-w-xl glass-strong p-6 sm:p-9">
-      <p className="text-sm font-semibold text-ink-2">Choose a keyholder</p>
-      <h1 className="mt-3 text-h2 text-balance">Open the same decision through one role.</h1>
+      <p className="text-sm font-semibold text-ink-2">Start the example</p>
+      <h1 className="mt-3 text-h2 text-balance">First, open Ana’s screen.</h1>
       <p className="mt-4 max-w-[52ch] text-ink-2">
-        Finance and CEO share the action facts. Each gets the context needed for a different responsibility.
+        Approve as Ana, switch to Marco, and follow the next-step prompt. The whole demo takes four simple steps.
       </p>
 
       <div className="mt-8 grid grid-cols-2 gap-2" aria-label="Keyholder role">
@@ -132,7 +132,7 @@ function Login({
 
       {localDemo && (
         <p className="mt-6 rounded-lg border border-hairline bg-white/5 px-4 py-3 text-sm text-ink-2">
-          Local demo authentication is enabled. No access code is required.
+          Demo mode: no access code needed.
         </p>
       )}
       {error && (
@@ -147,7 +147,7 @@ function Login({
         onClick={signIn}
         className="mt-6 w-full rounded-full bg-white px-5 py-3.5 font-bold text-on-accent transition hover:bg-white/90 active:translate-y-px disabled:cursor-wait disabled:opacity-60"
       >
-        {busy ? "Opening decision..." : `Continue as ${roleNames[role]}`}
+        {busy ? "Opening..." : `Open ${roleNames[role]}`}
       </button>
     </div>
   );
@@ -159,9 +159,9 @@ function ActionCapsule({ view }: { view: DecisionView }) {
     <section className="glass-strong p-5 sm:p-7" aria-labelledby="action-title">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <p className="text-sm font-semibold text-ink-2">Canonical action v{action.version}</p>
+          <p className="text-sm font-semibold text-ink-2">Step 1 · Campaign request</p>
           <h2 id="action-title" className="mt-2 text-h2 text-balance">
-            Activate the EU launch campaign
+            Turn on the EU launch campaign
           </h2>
         </div>
         <span className="rounded-full border border-hairline-strong bg-white/8 px-3 py-1.5 text-sm font-semibold">
@@ -172,53 +172,48 @@ function ActionCapsule({ view }: { view: DecisionView }) {
       <div className="mt-7 grid gap-6 border-t border-hairline pt-6 sm:grid-cols-[1fr_auto]">
         <div>
           <p className="text-4xl font-bold tracking-[-0.04em] tabular-nums sm:text-5xl">€30,000</p>
-          <p className="mt-2 text-ink-2">14-day business cap, Google Ads test account</p>
+          <p className="mt-2 text-ink-2">14 days · Google Ads test account</p>
         </div>
         <div className="grid grid-cols-2 gap-x-6 gap-y-3 text-sm sm:text-right">
           <div>
-            <p className="text-ink-3">Current</p>
-            <p className="mt-1 font-semibold">{action.campaign.currentStatus}</p>
+            <p className="text-ink-3">Now</p>
+            <p className="mt-1 font-semibold">Paused</p>
           </div>
           <div>
-            <p className="text-ink-3">Requested</p>
-            <p className="mt-1 font-semibold">{action.campaign.desiredStatus}</p>
-          </div>
-          <div>
-            <p className="text-ink-3">Starts</p>
-            <p className="mt-1 font-semibold">{action.businessDecision.startDate}</p>
-          </div>
-          <div>
-            <p className="text-ink-3">Ends</p>
-            <p className="mt-1 font-semibold">{action.businessDecision.endDate}</p>
+            <p className="text-ink-3">If approved</p>
+            <p className="mt-1 font-semibold">On</p>
           </div>
         </div>
       </div>
 
       {action.executionConditions.length > 0 && (
         <div className="mt-6 rounded-lg border border-white/25 bg-white/8 p-4">
-          <p className="text-sm font-semibold">Material condition added</p>
+          <p className="text-sm font-semibold">Safety rule added</p>
           <p className="mt-2 text-sm leading-relaxed text-ink-2">
-            Product readiness must remain GREEN and execution must happen before {formatDate(
+            Only launch while product readiness is GREEN and before {formatDate(
               action.executionConditions.find((item) => item.type === "execute_before")!.timestamp,
             )}.
           </p>
         </div>
       )}
 
-      <dl className="mt-6 grid gap-3 text-sm sm:grid-cols-3">
-        <div>
-          <dt className="text-ink-3">Action hash</dt>
-          <dd className="mt-1 font-mono text-xs" title={action.actionHash}>{shortHash(action.actionHash)}</dd>
-        </div>
-        <div>
-          <dt className="text-ink-3">Evidence hash</dt>
-          <dd className="mt-1 font-mono text-xs" title={action.evidenceBundleHash}>{shortHash(action.evidenceBundleHash)}</dd>
-        </div>
-        <div>
-          <dt className="text-ink-3">Policy</dt>
-          <dd className="mt-1 font-mono text-xs">{action.policyVersion}</dd>
-        </div>
-      </dl>
+      <details className="mt-6 border-t border-hairline pt-4 text-sm">
+        <summary className="cursor-pointer font-semibold text-ink-2">Show technical proof</summary>
+        <dl className="mt-4 grid gap-3 sm:grid-cols-3">
+          <div>
+            <dt className="text-ink-3">Plan fingerprint</dt>
+            <dd className="mt-1 font-mono text-xs" title={action.actionHash}>{shortHash(action.actionHash)}</dd>
+          </div>
+          <div>
+            <dt className="text-ink-3">Evidence fingerprint</dt>
+            <dd className="mt-1 font-mono text-xs" title={action.evidenceBundleHash}>{shortHash(action.evidenceBundleHash)}</dd>
+          </div>
+          <div>
+            <dt className="text-ink-3">Rule version</dt>
+            <dd className="mt-1 font-mono text-xs">{action.policyVersion}</dd>
+          </div>
+        </dl>
+      </details>
     </section>
   );
 }
@@ -227,9 +222,9 @@ function Approvals({ view }: { view: DecisionView }) {
   return (
     <section className="glass p-5 sm:p-6" aria-labelledby="approvals-title">
       <div className="flex items-center justify-between gap-4">
-        <h2 id="approvals-title" className="text-h3">Two independent keys</h2>
+        <h2 id="approvals-title" className="text-h3">Step 2 · Both people approve</h2>
         <span className="text-sm tabular-nums text-ink-2">
-          {view.approvals.filter((item) => item.status === "APPROVED").length}/2 valid
+          {view.approvals.filter((item) => item.status === "APPROVED").length}/2 approved
         </span>
       </div>
       <div className="mt-5 grid gap-3 sm:grid-cols-2">
@@ -237,14 +232,16 @@ function Approvals({ view }: { view: DecisionView }) {
           <div key={approval.role} className="rounded-lg border border-hairline bg-white/5 p-4">
             <div className="flex items-center justify-between gap-3">
               <p className="font-semibold">{roleNames[approval.role]}</p>
-              <span className="text-xs font-bold">{approval.status}</span>
+              <span className="text-xs font-bold">
+                {approval.status === "APPROVED" ? "Approved" : approval.status === "STALE" ? "Approve again" : "Waiting"}
+              </span>
             </div>
             <p className="mt-2 text-sm text-ink-2">
               {approval.status === "APPROVED"
-                ? `Bound to action v${approval.actionVersion}`
+                ? "Approved this exact plan"
                 : approval.status === "STALE"
-                  ? `Approval on v${approval.actionVersion} cannot authorize v${view.action.version}`
-                  : `Waiting on action v${view.action.version}`}
+                  ? "The plan changed, so the old approval no longer counts"
+                  : "Has not approved this plan yet"}
             </p>
           </div>
         ))}
@@ -258,22 +255,22 @@ function FinanceContext({ view }: { view: DecisionView }) {
   const cap = Number(view.action.businessDecision.budgetCapMicros) / 1_000_000;
   return (
     <section className="glass p-5 sm:p-6" aria-labelledby="finance-context">
-      <h2 id="finance-context" className="text-h3">Budget and downside</h2>
+      <h2 id="finance-context" className="text-h3">What Ana checks</h2>
       <dl className="mt-5 grid grid-cols-2 gap-5">
         <div>
-          <dt className="text-sm text-ink-3">Available before</dt>
+          <dt className="text-sm text-ink-3">Budget before</dt>
           <dd className="mt-1 text-2xl font-bold tabular-nums">{eur(available)}</dd>
         </div>
         <div>
-          <dt className="text-sm text-ink-3">Remaining after</dt>
+          <dt className="text-sm text-ink-3">Budget after</dt>
           <dd className="mt-1 text-2xl font-bold tabular-nums">{eur(available - cap)}</dd>
         </div>
       </dl>
       <div className="mt-6 border-t border-hairline pt-5">
-        <p className="text-sm font-semibold">Counterevidence</p>
+        <p className="text-sm font-semibold">Risks to review</p>
         {view.evidence.counterevidence.map((item) => (
           <p key={item.factId} className="mt-3 text-sm leading-relaxed text-ink-2">
-            {item.statement} <span className="text-ink-3">Source: {item.sourceId}</span>
+            {item.statement}
           </p>
         ))}
       </div>
@@ -284,13 +281,13 @@ function FinanceContext({ view }: { view: DecisionView }) {
 function CeoContext() {
   return (
     <section className="glass p-5 sm:p-6" aria-labelledby="ceo-context">
-      <h2 id="ceo-context" className="text-h3">Strategy and opportunity cost</h2>
+      <h2 id="ceo-context" className="text-h3">What Marco compares</h2>
       <div className="mt-5 space-y-3">
         {SCENARIOS.map((scenario) => (
           <div key={scenario.name} className="rounded-lg border border-hairline bg-white/5 p-4">
             <div className="flex flex-wrap items-baseline justify-between gap-2">
               <p className="font-semibold">{scenario.name}</p>
-              <p className="text-sm font-semibold tabular-nums">{eur(scenario.upsideEur)} upside</p>
+              <p className="text-sm font-semibold tabular-nums">Up to {eur(scenario.upsideEur)}</p>
             </div>
             <p className="mt-2 text-sm leading-relaxed text-ink-2">{scenario.note}</p>
           </div>
@@ -321,7 +318,7 @@ function MetricStrip({ view }: { view: DecisionView }) {
         ];
   return (
     <section className="glass p-5 sm:p-6" aria-labelledby="metric-strip-title">
-      <h2 id="metric-strip-title" className="text-h3">Decision bounds</h2>
+      <h2 id="metric-strip-title" className="text-h3">Quick facts</h2>
       <dl className="mt-5 grid grid-cols-3 gap-3">
         {metrics.map((metric) => (
           <div key={metric.label} className="min-w-0">
@@ -336,8 +333,8 @@ function MetricStrip({ view }: { view: DecisionView }) {
 
 function Evidence({ view }: { view: DecisionView }) {
   return (
-    <section className="glass p-5 sm:p-6" aria-labelledby="evidence-title">
-      <h2 id="evidence-title" className="text-h3">Shared source ledger</h2>
+    <details className="glass p-5 sm:p-6">
+      <summary className="cursor-pointer font-semibold">See shared data sources</summary>
       <div className="mt-5 space-y-4">
         {Object.entries(view.evidence.facts).map(([factId, fact]) => (
           <div key={factId} className="grid gap-1 sm:grid-cols-[1fr_auto] sm:gap-5">
@@ -349,7 +346,7 @@ function Evidence({ view }: { view: DecisionView }) {
           </div>
         ))}
       </div>
-    </section>
+    </details>
   );
 }
 
@@ -357,20 +354,22 @@ function LeaseAndReceipt({ view }: { view: DecisionView }) {
   if (!view.lease && !view.receipt) return null;
   return (
     <section className="glass p-5 sm:p-6" aria-labelledby="lease-title">
-      <h2 id="lease-title" className="text-h3">Execution proof</h2>
+      <h2 id="lease-title" className="text-h3">Step 3 · One launch only</h2>
       {view.lease && (
-        <dl className="mt-5 grid gap-4 text-sm sm:grid-cols-2">
-          <div><dt className="text-ink-3">Lease</dt><dd className="mt-1 break-all font-mono text-xs">{view.lease.leaseId}</dd></div>
-          <div><dt className="text-ink-3">Expires</dt><dd className="mt-1 font-semibold">{formatDate(view.lease.expiresAt)}</dd></div>
-          <div><dt className="text-ink-3">Single use</dt><dd className="mt-1 font-semibold">Yes</dd></div>
-          <div><dt className="text-ink-3">Consumed</dt><dd className="mt-1 font-semibold">{view.lease.consumedAt ? formatDate(view.lease.consumedAt) : "Not yet"}</dd></div>
-        </dl>
+        <div className="mt-5">
+          <p className="font-semibold">TwoKeys allows this campaign to launch once.</p>
+          <p className="mt-2 text-sm text-ink-2">After that, the same permission cannot be reused.</p>
+          <details className="mt-4 text-sm text-ink-2">
+            <summary className="cursor-pointer font-semibold">Show permission details</summary>
+            <p className="mt-3 break-all font-mono text-xs">{view.lease.leaseId}</p>
+            <p className="mt-2">Expires {formatDate(view.lease.expiresAt)}</p>
+          </details>
+        </div>
       )}
       {view.receipt && (
         <div className="mt-6 rounded-lg border border-white/30 bg-white/10 p-4">
-          <p className="font-semibold">Read-back confirmed {view.receipt.observedStatus}</p>
-          <p className="mt-2 text-sm text-ink-2">{view.receipt.operation}</p>
-          <p className="mt-2 break-all font-mono text-xs text-ink-3">Receipt {view.receipt.receiptId}</p>
+          <p className="font-semibold">Google Ads says the campaign is on.</p>
+          <p className="mt-2 text-sm text-ink-2">The one-use permission is now spent.</p>
         </div>
       )}
     </section>
@@ -400,8 +399,8 @@ function AdaptationProof({
 }) {
   return (
     <section className="glass p-5 sm:p-6" aria-labelledby="adaptation-title">
-      <p className="text-sm font-semibold text-ink-2">Later interaction</p>
-      <h2 id="adaptation-title" className="mt-2 text-h3">Explicit CEO memory</h2>
+      <p className="text-sm font-semibold text-ink-2">After the launch</p>
+      <h2 id="adaptation-title" className="mt-2 text-h3">Remember how Marco likes decisions explained</h2>
       <p className="mt-4 text-sm leading-relaxed text-ink-2">
         For larger launch decisions, show the smallest reversible pilot and its opportunity cost before the full upside.
       </p>
@@ -412,7 +411,7 @@ function AdaptationProof({
           onClick={remember}
           className="mt-5 rounded-full border border-hairline-strong px-4 py-2.5 text-sm font-semibold transition hover:bg-white/10 active:translate-y-px disabled:opacity-60"
         >
-          Remember this preference
+          Remember Marco’s preference
         </button>
       ) : (
         <button
@@ -421,22 +420,22 @@ function AdaptationProof({
           onClick={compare}
           className="mt-5 rounded-full border border-hairline-strong px-4 py-2.5 text-sm font-semibold transition hover:bg-white/10 active:translate-y-px disabled:opacity-60"
         >
-          Compare memory off and on
+          Show the difference next time
         </button>
       )}
 
       {comparison && (
         <div className="mt-5 grid gap-3" aria-live="polite">
           <div className="rounded-lg border border-hairline bg-white/5 p-4">
-            <p className="text-xs font-bold text-ink-3">MEMORY OFF</p>
+            <p className="text-xs font-bold text-ink-3">WITHOUT MARCO’S PREFERENCE</p>
             <p className="mt-2 text-sm font-semibold">{comparison.control.surface.lead}</p>
           </div>
           <div className="rounded-lg border border-white/30 bg-white/10 p-4">
-            <p className="text-xs font-bold text-ink-3">CEO MEMORY ON</p>
+            <p className="text-xs font-bold text-ink-3">WITH MARCO’S PREFERENCE</p>
             <p className="mt-2 text-sm font-semibold">{comparison.treatment.surface.lead}</p>
           </div>
           <p className="text-xs leading-relaxed text-ink-3">
-            Shared evidence {comparison.unchanged.evidenceHash ? "unchanged" : "changed"}. Policy {comparison.unchanged.policyVersion ? "unchanged" : "changed"}.
+            The shared facts and approval rules stay exactly the same.
           </p>
         </div>
       )}
@@ -539,7 +538,8 @@ export function DecisionConsole({ localDemo }: { localDemo: boolean }) {
       setView(next);
       setNotice(success);
     } catch (reason) {
-      setError(reason instanceof Error ? reason.message : "The operation failed closed.");
+      const message = reason instanceof Error ? reason.message : "The operation failed closed.";
+      setError(message === "Lease replay denied before execution." ? "Blocked: this campaign was already launched once." : message);
     } finally {
       setBusy(false);
     }
@@ -607,14 +607,50 @@ export function DecisionConsole({ localDemo }: { localDemo: boolean }) {
     view.status !== "CONSUMED" &&
     !canAddCondition &&
     myApproval?.status !== "APPROVED";
+  const nextStep = canAddCondition
+    ? {
+        title: "Marco adds one safety rule.",
+        body: "Require the product to stay ready before the campaign launches.",
+      }
+    : canApprove
+      ? {
+          title: `${roleNames[view.viewerRole]} approves this plan.`,
+          body: "The approval applies only to the exact version shown here.",
+        }
+      : view.status === "FULLY_APPROVED"
+        ? {
+            title: "Both people approved. Allow one launch.",
+            body: "This creates a short-lived permission that works once.",
+          }
+        : view.status === "LEASED"
+          ? {
+              title: "The campaign is ready. Launch it.",
+              body: "TwoKeys will use the permission and immediately spend it.",
+            }
+          : view.status === "CONFIRMED"
+            ? {
+                title: "Done. Now try the same launch again.",
+                body: "The second attempt proves that used permission cannot be replayed.",
+              }
+            : view.status === "CONSUMED"
+              ? {
+                  title: "The launch was sent. Check the result.",
+                  body: "TwoKeys reads Google Ads again without launching a second time.",
+                }
+              : {
+                  title: `Now switch to ${roleNames[otherRole]}.`,
+                  body: "The campaign stays paused until the other person finishes their step.",
+                };
 
   return (
     <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,1.15fr)_minmax(22rem,0.85fr)]">
       <div className="min-w-0 space-y-5">
         <div className="flex flex-col gap-4 px-1 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <p className="text-sm font-semibold text-ink-2">Signed in as {roleNames[view.viewerRole]}</p>
-            <p className="mt-1 max-w-[58ch] text-sm text-ink-3">{view.surface.owns}</p>
+            <p className="text-sm font-semibold text-ink-2">You are {roleNames[view.viewerRole]}</p>
+            <p className="mt-1 max-w-[58ch] text-sm text-ink-3">
+              {view.viewerRole === "finance" ? "Ana checks affordability and risk." : "Marco checks timing and alternatives."}
+            </p>
           </div>
           <button
             type="button"
@@ -622,7 +658,7 @@ export function DecisionConsole({ localDemo }: { localDemo: boolean }) {
             onClick={() => localDemo || codes[otherRole] ? signIn(otherRole) : (setView(null), setLoginRole(otherRole))}
             className="self-start rounded-full border border-hairline-strong px-4 py-2.5 text-sm font-semibold transition hover:bg-white/10 active:translate-y-px disabled:opacity-60 sm:self-auto"
           >
-            Switch to {roleNames[otherRole]}
+            Open {roleNames[otherRole]}
           </button>
         </div>
 
@@ -634,16 +670,15 @@ export function DecisionConsole({ localDemo }: { localDemo: boolean }) {
       <aside className="min-w-0 space-y-5">
         <section className="glass-strong p-5 sm:p-6" aria-labelledby="role-lead">
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <p className="text-sm font-semibold text-ink-2">{roleNames[view.viewerRole]} view</p>
+            <p className="text-sm font-semibold text-ink-2">What to do next</p>
             <p className="text-xs text-ink-3">
               {surfaceBusy
-                ? "Composing surface..."
-                : surfaceGenerator?.source === "gemini"
-                  ? `${surfaceGenerator.modelId} · validated ${surfaceGenerator.a2uiVersion}`
-                  : "Validated local surface"}
+                ? "Preparing this view..."
+                : surfaceGenerator?.source === "gemini" ? "Prepared by Gemini" : "Demo view ready"}
             </p>
           </div>
-          <h2 id="role-lead" className="mt-3 text-h3 text-balance">{view.surface.lead}</h2>
+          <h2 id="role-lead" className="mt-3 text-h3 text-balance">{nextStep.title}</h2>
+          <p className="mt-3 text-sm leading-relaxed text-ink-2">{nextStep.body}</p>
 
           {(error || notice) && (
             <p
@@ -659,30 +694,30 @@ export function DecisionConsole({ localDemo }: { localDemo: boolean }) {
               <button
                 type="button"
                 disabled={busy}
-                onClick={() => run({ type: "condition", executeBefore: "2026-08-17T08:00:00Z" }, "Action v2 created. Finance v1 is now stale.")}
+                onClick={() => run({ type: "condition", executeBefore: new Date(Date.now() + 86_400_000).toISOString() }, "Safety rule added. Ana’s earlier approval no longer counts.")}
                 className="rounded-full bg-white px-5 py-3 font-bold text-on-accent transition hover:bg-white/90 active:translate-y-px disabled:cursor-wait disabled:opacity-60"
               >
-                Add launch guard
+                Add safety rule
               </button>
             )}
             {canApprove && (
               <button
                 type="button"
                 disabled={busy}
-                onClick={() => run({ type: "approve" }, `${roleNames[view.viewerRole]} approved action v${view.action.version}.`)}
+                onClick={() => run({ type: "approve" }, `${roleNames[view.viewerRole]} approved this plan.`)}
                 className="rounded-full bg-white px-5 py-3 font-bold text-on-accent transition hover:bg-white/90 active:translate-y-px disabled:cursor-wait disabled:opacity-60"
               >
-                Approve v{view.action.version}
+                Approve this plan
               </button>
             )}
             {view.status === "FULLY_APPROVED" && (
               <button
                 type="button"
                 disabled={busy}
-                onClick={() => run({ type: "issue_lease" }, "Single-use ActionLease issued.")}
+                onClick={() => run({ type: "issue_lease" }, "One-use launch permission created.")}
                 className="rounded-full bg-white px-5 py-3 font-bold text-on-accent transition hover:bg-white/90 active:translate-y-px disabled:cursor-wait disabled:opacity-60"
               >
-                Issue ActionLease
+                Allow one launch
               </button>
             )}
             {view.status === "LEASED" && (
@@ -690,10 +725,10 @@ export function DecisionConsole({ localDemo }: { localDemo: boolean }) {
                 <button
                   type="button"
                   disabled={busy}
-                  onClick={() => run({ type: "execute" }, "Campaign mutation confirmed by read-back.")}
+                  onClick={() => run({ type: "execute" }, "Google Ads confirmed that the campaign is on.")}
                   className="rounded-full bg-white px-5 py-3 font-bold text-on-accent transition hover:bg-white/90 active:translate-y-px disabled:cursor-wait disabled:opacity-60"
                 >
-                  Execute once
+                  Launch campaign
                 </button>
                 <button
                   type="button"
@@ -701,7 +736,7 @@ export function DecisionConsole({ localDemo }: { localDemo: boolean }) {
                   onClick={() => view.lease && run({ type: "revoke_lease", leaseId: view.lease.leaseId }, "Lease revoked. Execution is blocked.")}
                   className="rounded-full border border-hairline-strong px-5 py-3 font-semibold transition hover:bg-white/10 active:translate-y-px disabled:opacity-60"
                 >
-                  Revoke lease
+                  Cancel permission
                 </button>
               </>
             )}
@@ -712,17 +747,17 @@ export function DecisionConsole({ localDemo }: { localDemo: boolean }) {
                 onClick={() => run({ type: "execute" }, "Unexpected replay success.")}
                 className="rounded-full border border-hairline-strong px-5 py-3 font-semibold transition hover:bg-white/10 active:translate-y-px disabled:cursor-wait disabled:opacity-60"
               >
-                Attempt replay
+                Try to launch again
               </button>
             )}
             {view.status === "CONSUMED" && (
               <button
                 type="button"
                 disabled={busy}
-                onClick={() => run({ type: "reconcile" }, "External state reconciled without another mutation.")}
+                onClick={() => run({ type: "reconcile" }, "Google Ads was checked without launching again.")}
                 className="rounded-full border border-hairline-strong px-5 py-3 font-semibold transition hover:bg-white/10 active:translate-y-px disabled:cursor-wait disabled:opacity-60"
               >
-                Reconcile read-back
+                Check Google Ads result
               </button>
             )}
           </div>

@@ -74,8 +74,22 @@ npm test
 npm run build
 ```
 
+Run the optional Gemma evidence-safety benchmark with Application Default
+Credentials and a billing-enabled Google Cloud project:
+
+```bash
+cd web
+GOOGLE_CLOUD_PROJECT=your-project npm run gemma:screen
+```
+
+The command calls `gemma-4-26b-a4b-it-maas` against one benign and one hostile
+fixture, then fails unless Gemma detects the frozen prompt injection and personal
+identifier. Its result is evaluation evidence only; it cannot authorize or block
+an action.
+
 The Firestore emulator check and the guarded Cloud Run deployment are documented
-in [GCP deployment](docs/03-system/gcp-deployment.md).
+in [GCP deployment](docs/03-system/gcp-deployment.md), including the keyless
+GitHub Actions auto-deploy path.
 
 ## Connect an agent
 
@@ -105,6 +119,7 @@ examples for supported agent harnesses. See
 - in-memory development state and transactional Firestore persistence
 - MCP, HTTP, and Google ADK agent adapters
 - simulated execution plus a guarded Google Ads test-account adapter and read-back
+- a Gemma 4 MaaS evidence screen with a measurable benign/hostile benchmark
 - automated coverage for authority, replay, expiry, revocation, isolation,
   adaptation, integrations, and failure-closed behavior
 

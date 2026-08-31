@@ -95,8 +95,28 @@
 html {
   -webkit-text-size-adjust: 100%;
   scroll-behavior: smooth;
+  scrollbar-color: #76a8ff rgb(3 22 58 / 0.72);
+  scrollbar-width: thin;
   overflow-x: clip;
   background: var(--canvas-top);
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgb(3 22 58 / 0.72);
+}
+
+::-webkit-scrollbar-thumb {
+  border: 2px solid transparent;
+  border-radius: 999px;
+  background: linear-gradient(#8ab5ff, #2f76ff) padding-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(#b7d0ff, #4e8bff) padding-box;
 }
 
 body {
@@ -413,7 +433,7 @@ body {
  * ------------------------------------------------------------------ */
 
 .phone-scale {
-  --phone-zoom: 0.8;
+  --phone-zoom: 0.82;
   width: calc(427px * var(--phone-zoom));
   height: calc(864px * var(--phone-zoom));
   margin-inline: auto;
@@ -428,13 +448,13 @@ body {
 
 @media (min-width: 480px) {
   .phone-scale {
-    --phone-zoom: 0.86;
+    --phone-zoom: 0.92;
   }
 }
 
 @media (min-width: 1024px) {
   .phone-scale {
-    --phone-zoom: 0.75;
+    --phone-zoom: 0.92;
   }
 }
 
@@ -442,133 +462,33 @@ body {
   background: var(--paper);
 }
 
-/* ------------------------------------------------------------------ *
- * Liquid glass — the phone surface
- *
- * iOS material rather than a flat translucent panel. Four things do the work,
- * and dropping any one of them collapses it back into frosted plastic:
- *
- *   saturate() on the backdrop, so what is behind the pane comes through
- *   richer instead of milky;
- *   an asymmetric specular edge — bright along the top, faint along the
- *   bottom — because a real pane catches the light on its top bevel only;
- *   a lens highlight raked off the top-left corner, which is the refraction;
- *   a soft, low drop shadow, so the pane floats rather than sits.
- *
- * Edges are inset shadows, not borders. A border would inherit the global
- * hairline colour, add to the box, and break the corner continuity that makes
- * nested radii read as concentric.
- * ------------------------------------------------------------------ */
-
 @utility lg {
   position: relative;
-  border-radius: 1.625rem;
+  border-radius: 0.875rem;
+  border: 1px solid rgb(112 145 200 / 0.14);
   background:
     radial-gradient(
-      125% 80% at 8% -12%,
-      rgb(255 255 255 / 0.22),
-      transparent 58%
+      120% 100% at 0% 0%,
+      rgb(43 92 165 / 0.16),
+      transparent 52%
     ),
-    linear-gradient(
-      158deg,
-      rgb(255 255 255 / 0.15),
-      rgb(255 255 255 / 0.05) 48%,
-      rgb(255 255 255 / 0.085)
-    );
-  backdrop-filter: blur(28px) saturate(190%);
-  -webkit-backdrop-filter: blur(28px) saturate(190%);
-  box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.45),
-    inset 0 -1px 0 rgb(255 255 255 / 0.1),
-    inset 1px 0 0 rgb(255 255 255 / 0.12),
-    inset -1px 0 0 rgb(255 255 255 / 0.12),
-    0 18px 36px -20px rgb(2 12 40 / 0.9);
+    linear-gradient(145deg, rgb(13 39 80 / 0.96), rgb(7 28 60 / 0.96));
+  box-shadow: 0 10px 24px -18px rgb(0 0 0 / 0.9);
 }
 
-/* Same material, tuned for small controls: capsules, chips, the meter. Less
-   blur because there is less area to blur, and a tighter highlight. */
-@utility lg-thin {
-  position: relative;
-  border-radius: 999px;
-  background:
-    radial-gradient(
-      140% 120% at 12% -30%,
-      rgb(255 255 255 / 0.24),
-      transparent 62%
-    ),
-    linear-gradient(
-      160deg,
-      rgb(255 255 255 / 0.14),
-      rgb(255 255 255 / 0.06)
-    );
-  backdrop-filter: blur(16px) saturate(180%);
-  -webkit-backdrop-filter: blur(16px) saturate(180%);
-  box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.4),
-    inset 0 -1px 0 rgb(255 255 255 / 0.08),
-    inset 0 0 0 1px rgb(255 255 255 / 0.1);
-}
-
-/* The tinted variant, for the one pane that is carrying a decision rather
-   than holding content. Same construction, brand hue in the fill. */
-@utility lg-tint {
-  position: relative;
-  border-radius: 1.375rem;
-  background:
-    radial-gradient(
-      125% 90% at 10% -15%,
-      rgb(163 197 255 / 0.3),
-      transparent 60%
-    ),
-    linear-gradient(
-      158deg,
-      rgb(110 162 255 / 0.24),
-      rgb(110 162 255 / 0.12)
-    );
-  backdrop-filter: blur(24px) saturate(190%);
-  -webkit-backdrop-filter: blur(24px) saturate(190%);
-  box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.4),
-    inset 0 -1px 0 rgb(255 255 255 / 0.08),
-    inset 0 0 0 1px rgb(140 180 255 / 0.28),
-    0 14px 30px -20px rgb(2 12 40 / 0.9);
-}
-
-/* The wallpaper the glass refracts. Without something with structure behind
-   it, a blurred pane has nothing to bend and the whole material is wasted —
-   so the phone gets the same sky the page has, pushed back with a blur and a
-   brand-blue multiply. */
 @utility phone-sky {
   background-image:
     radial-gradient(
-      70% 42% at 78% 8%,
-      rgb(126 176 255 / 0.5),
-      transparent 62%
+      90% 46% at 84% 0%,
+      rgb(27 81 175 / 0.2),
+      transparent 64%
     ),
     radial-gradient(
-      60% 38% at 12% 30%,
-      rgb(88 130 240 / 0.42),
-      transparent 66%
-    ),
-    radial-gradient(
-      90% 34% at 50% 104%,
-      rgb(104 152 255 / 0.34),
+      75% 42% at 0% 34%,
+      rgb(24 72 152 / 0.16),
       transparent 68%
     ),
-    linear-gradient(180deg, rgb(6 26 77 / 0.42), rgb(4 16 52 / 0.8)),
-    url("/sky/day-poster.jpg");
-  background-size:
-    auto,
-    auto,
-    auto,
-    auto,
-    cover;
-  background-position:
-    center,
-    center,
-    center,
-    center,
-    center 22%;
+    linear-gradient(180deg, #03132f 0%, #020d21 100%);
 }
 
 /* iOS home indicator. Present because a phone screen without one reads as a

@@ -45,6 +45,38 @@ Cloud Run, pins `APP_ORIGIN`, and checks `/api/health`. It refuses to replace a
 same-named Cloud Run service that it did not create, and Cloud Run refuses to
 use the in-memory state backend.
 
+## Automatic deployment from GitHub
+
+The first deployment remains a deliberate bootstrap with an authenticated human
+operator. After it succeeds, configure GitHub Actions to update only that owned
+service with short-lived Workload Identity Federation credentials:
+
+```bash
+export GCP_PROJECT_ID=your-billing-enabled-project
+export GITHUB_REPOSITORY_ID=your-immutable-numeric-repository-id
+./infra/setup-github-oidc.sh
+```
+
+The setup script binds the provider to that immutable repository ID and to
+`refs/heads/main`. It grants the deploy identity Artifact Registry writer on the
+TwoKeys repository, Cloud Run developer on the existing TwoKeys service,
+Service Usage consumer, and permission to run as the existing
+`twokeys-runtime` account. It does not create a service-account key.
+
+Add the three values printed by the script plus
+`GOOGLE_ADS_CONFIGURATION_SNAPSHOT_HASH` as GitHub repository variables under
+**Settings -> Secrets and variables -> Actions -> Variables**. The digest is a
+configuration identifier, not a credential. Optional variables are
+`GCP_REGION`, `SERVICE_NAME`, and `ARTIFACT_REPOSITORY`; their defaults match
+`infra/deploy.sh`.
+
+The workflow at `.github/workflows/deploy-gcloud.yml` runs tests and lint, builds
+the container, pushes the commit SHA tag, and calls the deploy script with
+`DEPLOY_ONLY=true`. That mode refuses to create a new service, change public
+access, reconfigure secrets, provision infrastructure, or deploy over a service
+without the `twokeys_owner=deploy-script` label. Create and protect a GitHub
+environment named `production` if deploys should require approval.
+
 ## Local Firestore verification
 
 Start the official emulator from the repository root, then run the integration

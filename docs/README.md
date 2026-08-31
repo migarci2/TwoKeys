@@ -31,6 +31,9 @@ docs/
 The [four-minute script](02-demo/four-minute-script.md) is a production artifact,
 not a substitute for the product and system documents.
 
+The [Project Story](05-delivery/project-story.md) is the long-form Devpost copy,
+with hidden placeholders for the final demo GIFs.
+
 ## Status vocabulary
 
 - **Decided:** direction or scope that should not change during the sprint.

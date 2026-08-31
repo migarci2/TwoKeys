@@ -28,9 +28,9 @@ interface Feature {
 
 const FEATURES: Feature[] = [
   {
-    tab: "Who signs",
-    title: "The plan picks its signers.",
-    body: "The agent writes down exactly what it wants to do, and the plan itself decides who must agree: it does not get to choose. A routine action resolves to nobody and just runs. €30,000 resolves to Ana and Marco, and nothing happens until both say yes to that same plan.",
+    tab: "1. Two approvals",
+    title: "A €30,000 campaign needs two yeses.",
+    body: "Ana checks the budget. Marco checks the launch. The campaign stays paused until both approve the exact same plan.",
     frames: [
       { finance: "waiting", ceo: "waiting" },
       { finance: "yes", ceo: "waiting" },
@@ -38,9 +38,9 @@ const FEATURES: Feature[] = [
     ],
   },
   {
-    tab: "A change resets it",
-    title: "Move the plan and the yes goes with it.",
-    body: "Marco adds a condition, so this is no longer what Ana agreed to. Her approval does not quietly carry over. It expires, on both their phones, and everyone answers again.",
+    tab: "2. Change = reset",
+    title: "Change the plan and ask again.",
+    body: "Marco adds a safety rule. Ana’s old approval expires because it was for a different plan, so both people approve the final version.",
     frames: [
       { finance: "yes", ceo: "waiting" },
       { finance: "gone", ceo: "waiting", changed: true },
@@ -48,9 +48,9 @@ const FEATURES: Feature[] = [
     ],
   },
   {
-    tab: "One shot only",
-    title: "Permission that spends itself.",
-    body: "Agreement buys exactly one action, for a few minutes. The moment it is used it is gone, so the same approval can never be replayed into a second campaign.",
+    tab: "3. Use once",
+    title: "One approval launches once.",
+    body: "After both approve, TwoKeys allows one launch. The permission is then spent, so a second launch attempt is blocked.",
     frames: [
       { finance: "yes", ceo: "yes", changed: true, stage: "live" },
       { finance: "yes", ceo: "yes", changed: true, stage: "spent" },
@@ -112,7 +112,7 @@ export function How() {
     <Section
       id="how"
       word="How"
-      lead="Whoever the plan resolves gets it on their phone, and the agent waits as long as they take. Watch each piece of it run."
+      lead="Example: an agent wants to launch a €30,000 campaign. Ana in Finance and Marco, the CEO, must approve the same plan before anything happens."
     >
       <div ref={sectionRef}>
         <div className="glass mx-auto mb-10 grid max-w-2xl gap-1 p-1 sm:grid-cols-3">

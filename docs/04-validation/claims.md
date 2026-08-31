@@ -34,6 +34,7 @@ As of 2026-08-13:
 | “TwoKeys executed a real Google Ads API mutation in a test account.” | Provider call and read-back receipt; test-account label always visible |
 | “Explicit CEO feedback changed only the later CEO surface.” | M1 memory-off/on result |
 | “No cross-role canary leaks were observed.” | U3 results with run count and scope stated |
+| “Gemma flagged prompt injection and personal data in the frozen hostile evidence fixture.” | G1 output from `npm run gemma:screen`, including model ID and prompt version |
 
 ## Claims allowed now
 

@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { Section } from "@/components/site/Section";
 
 /**
@@ -17,12 +18,13 @@ export function Adaptation() {
           try first.&rdquo;
         </blockquote>
         <figcaption className="mt-7 flex items-center justify-center gap-3">
-          <span
-            aria-hidden
-            className="grid h-9 w-9 place-items-center rounded-full bg-accent text-sm font-bold text-on-accent"
-          >
-            M
-          </span>
+          <Image
+            src="/people/marco-ceo-v2.webp"
+            alt="Marco"
+            width={40}
+            height={40}
+            className="h-10 w-10 rounded-full object-cover ring-1 ring-white/35"
+          />
           <span className="text-ink-2">Marco, CEO</span>
         </figcaption>
       </figure>

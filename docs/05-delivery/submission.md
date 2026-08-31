@@ -90,11 +90,16 @@ never grants authority.
   the other's surface.
 - Per-role adaptation across episodes: explicit CEO feedback changes only the
   later CEO surface. [EVIDENCE PENDING: episode 2 memory-off/on result]
+- Advisory evidence screening with Gemma 4 against a frozen benign/hostile pair;
+  the authority kernel never consumes the model's verdict.
+  [EVIDENCE PENDING: retain the passing `npm run gemma:screen` output]
 
 ## Technologies
 
 - **Gemini 3.7 Flash** for evidence interpretation and declarative surface
   generation.
+- **Gemma 4 26B A4B IT MaaS** for the separate prompt-injection and personal-data
+  evidence-screen benchmark.
 - **A2UI** declarative rendering, constrained to an allowlisted component set.
 - **Google Cloud** for hosting and the transactional decision kernel.
 - **Firestore** transactions for approval state and atomic lease issue/consume.
