@@ -139,6 +139,11 @@ dedicated runtime service account. Agents can connect through HTTP, MCP, or the
 Google ADK adapter. The deployment path also supports keyless GitHub Actions
 authentication through Workload Identity Federation.
 
+The public demo is live at
+[twokeys.migarci2.dev/demo](https://twokeys.migarci2.dev/demo). It runs the
+application, Firestore state, and Gemini role surfaces on Google Cloud while the
+public Google Ads executor remains safely simulated.
+
 ![TwoKeys architecture: dual approval before external execution](https://raw.githubusercontent.com/migarci2/TwoKeys/main/diagrams/twokeys-architecture.png)
 
 ## Challenges we ran into
@@ -193,7 +198,7 @@ external consequence, and one later episode.
   revoked, mismatched, or replayed authority.
 - We isolated role memory and left canaries in the evaluation path so privacy
   claims can be measured rather than assumed.
-- Our local automated suite currently passes 49 checks across the authority
+- Our local automated suite currently passes 56 checks across the authority
   kernel, agent seam, adapters, executor, sessions, surfaces, memory isolation,
   and Gemma screen contract.
 - We kept the claims honest: synthetic business data is labelled, a test-account
@@ -236,7 +241,7 @@ that refuses to move until the keys match.
 
 First, we will finish the proof for the slice already built:
 
-1. Run the complete flow on Cloud Run against the Google Ads test account.
+1. Run the deployed execution path against the Google Ads test account.
 2. Retain the provider request ID and read-back receipt for the single mutation.
 3. Publish the predeclared benchmark, including failures and the live Gemma G1
    output.

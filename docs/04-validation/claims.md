@@ -5,7 +5,7 @@ moves from planned to defensible only after its evidence exists.
 
 ## Current truth
 
-As of 2026-08-24:
+As of 2026-08-31:
 
 | Claim area | Current evidence |
 |---|---|
@@ -16,8 +16,9 @@ As of 2026-08-24:
 | Google Ads campaign creation in `PAUSED` state | Verified in official Google Ads documentation |
 | Google Ads MPA limited to three user-access actions | Verified in official Google Ads documentation |
 | TwoKeys implementation | Local application, ADK agents, deterministic kernel, adapters and automated tests exist in this repository |
+| Public Google Cloud demo | Cloud Run, Firestore, and live Gemini path verified at `twokeys.migarci2.dev`; deployment record and screenshot retained |
 | Real test-account campaign mutation by TwoKeys | Not yet demonstrated |
-| Benchmark results | 54 automated local checks pass; Firestore emulator and live-provider evidence are tracked separately |
+| Benchmark results | 56 automated local checks pass; Firestore emulator and live-provider evidence are tracked separately |
 | Cross-role isolation | Role-scoped storage and canary rejection implemented; final declared benchmark run pending |
 | Episode 2 adaptation | Local M1 memory-off/on check passes; final live Gemini evidence capture pending |
 

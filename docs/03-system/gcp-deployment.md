@@ -4,6 +4,7 @@
 
 ```text
 Browser
+  -> Cloudflare custom-domain proxy
   -> Cloud Run: Next.js UI, API, Decision Kernel, Gemini adapter, Ads executor
        -> Firestore: decision aggregate, isolated role memory, surface-run evidence
        -> Gemini API: structured role-surface composition only
@@ -26,9 +27,9 @@ executor by configuration accident.
 
 ## Required setup
 
-Use a new billing-enabled project. The currently selected `Gemini Project`
-contains unrelated Memoo services and has billing disabled, so the deployment
-script deliberately refuses to use it.
+Use a billing-enabled project. The verified public demo runs in
+`gen-lang-client-0046326200`; the deployment script requires the project ID
+explicitly and checks billing before making changes.
 
 For the lightweight public demo, create only `twokeys-session-secret` and
 `twokeys-gemini-api-key`, then run:
@@ -117,6 +118,12 @@ ALLOW_GOOGLE_ADS_RESET=true npm run ads:reset
 ```
 
 ## Deployment evidence
+
+The live revision, Cloud Build ID, image digest, Firestore state, public canary,
+and screenshot are recorded in
+[Google Cloud deployment evidence](../05-delivery/gcp-deployment-evidence.md).
+The source of the small custom-domain proxy is
+[`infra/cloudflare-worker.js`](../../infra/cloudflare-worker.js).
 
 Do not mark the external-action gate complete until a real test-account run has:
 
