@@ -21,6 +21,7 @@ const anton = Anton({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://twokeys.migarci2.dev"),
   title: {
     default: "TwoKeys - technical permission is not company authorization",
     template: "%s - TwoKeys",

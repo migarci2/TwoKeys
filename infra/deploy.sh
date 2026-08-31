@@ -136,14 +136,11 @@ if [[ "${DEPLOY_ONLY}" == "false" ]]; then
   gcloud builds submit "${ROOT_DIR}/web" --tag="${IMAGE}" --project="${GCP_PROJECT_ID}"
 fi
 
-RUN_ENV_VARS="STATE_BACKEND=firestore,EXECUTOR_MODE=google_ads,FIRESTORE_DATABASE_ID=(default),GEMINI_MODEL=gemini-3.7-flash,GOOGLE_ADS_API_VERSION=v25,GOOGLE_ADS_CONFIGURATION_SNAPSHOT_HASH=${GOOGLE_ADS_CONFIGURATION_SNAPSHOT_HASH}"
+RUN_ENV_VARS="STATE_BACKEND=firestore,EXECUTOR_MODE=google_ads,FIRESTORE_DATABASE_ID=(default),GEMINI_MODEL=gemini-3.7-flash,GOOGLE_ADS_API_VERSION=v25,GOOGLE_ADS_CONFIGURATION_SNAPSHOT_HASH=${GOOGLE_ADS_CONFIGURATION_SNAPSHOT_HASH},APP_ORIGIN=https://twokeys.migarci2.dev"
 DEPLOY_ACCESS=(--allow-unauthenticated)
 DEPLOY_ENV=(--set-env-vars="${RUN_ENV_VARS}")
 DEPLOY_SECRETS=(--set-secrets="SESSION_SECRET=twokeys-session-secret:latest,FINANCE_ACCESS_CODE=twokeys-finance-access-code:latest,CEO_ACCESS_CODE=twokeys-ceo-access-code:latest,AGENT_SEAM_KEY=twokeys-agent-seam-key:latest,GEMINI_API_KEY=twokeys-gemini-api-key:latest,GOOGLE_ADS_DEVELOPER_TOKEN=twokeys-google-ads-developer-token:latest,GOOGLE_ADS_CLIENT_ID=twokeys-google-ads-client-id:latest,GOOGLE_ADS_CLIENT_SECRET=twokeys-google-ads-client-secret:latest,GOOGLE_ADS_REFRESH_TOKEN=twokeys-google-ads-refresh-token:latest,GOOGLE_ADS_CUSTOMER_ID=twokeys-google-ads-customer-id:latest,GOOGLE_ADS_CAMPAIGN_ID=twokeys-google-ads-campaign-id:latest,GOOGLE_ADS_LOGIN_CUSTOMER_ID=twokeys-google-ads-login-customer-id:latest")
 if [[ "${DEPLOY_ONLY}" == "true" ]]; then
-  SERVICE_URL="$(gcloud run services describe "${SERVICE_NAME}" --region="${GCP_REGION}" \
-    --project="${GCP_PROJECT_ID}" --format='value(status.url)')"
-  RUN_ENV_VARS="${RUN_ENV_VARS},APP_ORIGIN=${SERVICE_URL}"
   DEPLOY_ACCESS=()
   DEPLOY_ENV=(--update-env-vars="${RUN_ENV_VARS}")
   DEPLOY_SECRETS=()
@@ -160,13 +157,9 @@ gcloud run deploy "${SERVICE_NAME}" \
   "${DEPLOY_SECRETS[@]}" \
   --project="${GCP_PROJECT_ID}"
 
-if [[ "${DEPLOY_ONLY}" == "false" ]]; then
-  SERVICE_URL="$(gcloud run services describe "${SERVICE_NAME}" --region="${GCP_REGION}" \
-    --project="${GCP_PROJECT_ID}" --format='value(status.url)')"
-  gcloud run services update "${SERVICE_NAME}" --region="${GCP_REGION}" \
-    --update-env-vars="APP_ORIGIN=${SERVICE_URL}" --project="${GCP_PROJECT_ID}" >/dev/null
-fi
+SERVICE_URL="$(gcloud run services describe "${SERVICE_NAME}" --region="${GCP_REGION}" \
+  --project="${GCP_PROJECT_ID}" --format='value(status.url)')"
 
 curl --fail --silent --show-error "${SERVICE_URL}/api/health"
 echo
-echo "TwoKeys deployed: ${SERVICE_URL}/demo"
+echo "TwoKeys deployed: https://twokeys.migarci2.dev/demo"

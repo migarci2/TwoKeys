@@ -5,6 +5,8 @@ description: "How I built a version-bound, multi-person approval boundary for co
 tags: ai, security, googlecloud, agents
 ---
 
+*I created this article for the purpose of entering the All Things Agentic Hackathon.*
+
 An AI agent already has the API key.
 
 It can read the campaign, change its status, and call Google Ads. Technically, it has everything it needs to activate a €30,000 launch campaign.

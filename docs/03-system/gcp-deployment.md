@@ -41,7 +41,8 @@ export GOOGLE_ADS_CONFIGURATION_SNAPSHOT_HASH=sha256:your-frozen-digest
 
 The script enables the required APIs, creates Artifact Registry, a protected
 Firestore database and the runtime service account, builds the image, deploys
-Cloud Run, pins `APP_ORIGIN`, and checks `/api/health`. It refuses to replace a
+Cloud Run, pins `APP_ORIGIN` to `https://twokeys.migarci2.dev`, and checks
+`/api/health`. It refuses to replace a
 same-named Cloud Run service that it did not create, and Cloud Run refuses to
 use the in-memory state backend.
 
