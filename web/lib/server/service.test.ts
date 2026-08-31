@@ -10,7 +10,11 @@ import {
   type CampaignStatus,
 } from "./authority.ts";
 import type { CampaignGateway } from "./executor.ts";
-import { executeCurrentDecision, reconcileCurrentDecision } from "./service.ts";
+import {
+  executeCurrentDecision,
+  reconcileCurrentDecision,
+  settleCurrentDecision,
+} from "./service.ts";
 import { MemoryDecisionStore } from "./store.ts";
 
 async function authorizedStore(): Promise<MemoryDecisionStore> {
@@ -91,4 +95,35 @@ test("a consumed unresolved execution freezes authority-bearing changes", async 
     ),
     (error) => error instanceof AuthorityError && error.code === "RECONCILIATION_REQUIRED",
   );
+});
+
+test("the second approval automatically leases, executes and records one receipt", async () => {
+  const store = new MemoryDecisionStore();
+  const now = "2026-08-14T09:04:00Z";
+  await store.update((state) => approve(state, "finance", "finance", now), now);
+  await store.update((state) => approve(state, "ceo", "ceo", now), now);
+  const action = currentAction(await store.read(now));
+  let status: CampaignStatus = "PAUSED";
+  let mutations = 0;
+  const gateway: CampaignGateway = {
+    async read() {
+      return {
+        resourceName: "customers/test/campaigns/preconfigured",
+        status,
+        configurationSnapshotHash: action.campaign.configurationSnapshotHash,
+      };
+    },
+    async enable() {
+      mutations += 1;
+      status = "ENABLED";
+      return { requestId: "request-auto-1" };
+    },
+  };
+
+  const settled = await settleCurrentDecision(store, gateway, () => now);
+  assert.equal(mutations, 1);
+  assert.equal(settled.leases.length, 1);
+  assert.equal(settled.leases[0]?.consumedAt, now);
+  assert.equal(settled.receipts.length, 1);
+  assert.equal(settled.receipts[0]?.requestId, "request-auto-1");
 });

@@ -14,47 +14,22 @@ Seven logical components are enough. They do not need to be seven services.
 
 ## System map
 
-```text
-                         frozen synthetic company data
-                                      |
-                                      v
-                         [1] Revenue Watcher / ADK
-                                      |
-                         proposed facts + citations
-                                      v
-                            [2] Decision Kernel
-                         /            |             \
-                        v             v              v
-                canonical action   policy        calculations
-                        |             |              |
-                        +-------------+--------------+
-                                      |
-                                      v
-                           [3] Firestore State
-                           /                    \
-                          v                      v
-              Finance context + memory   CEO context + memory
-                          \                      /
-                           v                    v
-                     [4] Role Surface Generator
-                         Gemini 3.7 Flash + A2UI
-                                      |
-                                      v
-                    [5] Trusted Renderer + Approval API
-                                      |
-                         approvals / material condition
-                                      |
-                                      v
-                         Decision Kernel + Firestore
-                                      |
-                           valid dual approval only
-                                      v
-                    [6] ActionLease Gate + Ads Executor
-                                      |
-                       Google Ads test account mutation
-                                      |
-                                      v
-                       [7] Receipt + Evaluation Harness
+```mermaid
+flowchart TD
+  S[Frozen synthetic company data] --> R[1. ADK Revenue Agent]
+  R -->|closed proposal schema| K[2. Deterministic Decision Kernel]
+  K --> P[Policy and canonical hashes]
+  K --> F[(3. Firestore state)]
+  F --> DF[Finance private transcript]
+  F --> DC[CEO private transcript]
+  DF --> D[4. ADK deliberation and role surface]
+  DC --> D
+  D --> U[5. Trusted renderer and approval API]
+  U -->|condition or approval| K
+  K -->|matching approvals only| L[6. Single-use ActionLease and Ads executor]
+  L -->|PAUSED to ENABLED| A[Google Ads test account]
+  A -->|fresh read-back| E[7. Receipt and evaluation harness]
+  E --> F
 ```
 
 ## The seven components

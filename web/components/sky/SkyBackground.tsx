@@ -1,5 +1,6 @@
 "use client";
 
+import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 
 /**
@@ -13,7 +14,8 @@ import { useEffect, useState } from "react";
  * Motion is skipped entirely when the reader has asked for reduced motion.
  */
 
-export function SkyBackground({ volumetric = true }: { volumetric?: boolean }) {
+export function SkyBackground() {
+  const volumetric = usePathname() !== "/demo";
   const [motionOk, setMotionOk] = useState(true);
   const [small, setSmall] = useState(false);
 

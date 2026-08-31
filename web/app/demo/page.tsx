@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
+import { ViewTransition } from "react";
 import { Nav } from "@/components/site/Nav";
 import { Footer } from "@/components/site/Footer";
-import { SkyBackground } from "@/components/sky/SkyBackground";
 import { Container } from "@/components/site/Section";
 import { DecisionConsole } from "@/components/demo/DecisionConsole";
 
@@ -12,36 +12,30 @@ export default function DemoPage() {
     process.env.NODE_ENV !== "production" && process.env.LOCAL_DEMO_AUTH === "true";
 
   return (
-    <div className="relative isolate min-h-[100dvh]">
-      <SkyBackground volumetric={false} />
-      <Nav demo />
-      <main className="relative z-10 py-10 sm:py-14 lg:py-16">
-        <Container>
-          <div className="mb-10 max-w-3xl">
-            <p className="label mb-3 text-ink-3">Interactive example</p>
-            <h1 className="text-hero text-balance">Approve one €30,000 campaign.</h1>
-            <p className="mt-4 text-lead">
-              An agent wants to turn on an EU ad campaign. Ana and Marco must approve the same final plan. Then it can launch once.
-            </p>
-          </div>
-          <ol className="glass mb-10 grid gap-px overflow-hidden p-px sm:grid-cols-2 lg:grid-cols-4">
-            {[
-              ["1", "Ana approves", "She checks the budget."],
-              ["2", "Marco adds a rule", "The plan changes."],
-              ["3", "Both approve again", "Now the plan matches."],
-              ["4", "Launch once", "A second try is blocked."],
-            ].map(([number, title, body]) => (
-              <li key={number} className="bg-[#071d52]/70 p-4 sm:p-5">
-                <p className="text-sm font-bold text-paper-blue">Step {number}</p>
-                <p className="mt-2 font-semibold">{title}</p>
-                <p className="mt-1 text-sm text-ink-3">{body}</p>
-              </li>
-            ))}
-          </ol>
-          <DecisionConsole localDemo={localDemo} />
-        </Container>
-      </main>
-      <Footer />
-    </div>
+    <ViewTransition
+      enter={{ "nav-forward": "nav-forward", "nav-back": "nav-back", default: "none" }}
+      exit={{ "nav-forward": "nav-forward", "nav-back": "nav-back", default: "none" }}
+      default="none"
+    >
+      <div className="relative isolate min-h-[100dvh]">
+        <Nav demo />
+        <main className="relative z-10 py-8 sm:py-12 lg:py-14">
+          <Container>
+            <div className="mb-8 max-w-4xl sm:mb-10">
+              <div className="mb-5 flex flex-wrap gap-2 text-xs font-bold tracking-[0.12em] text-ink-2">
+                <span className="rounded-full border border-hairline-strong bg-white/10 px-3 py-1.5">LIVE BACKEND</span>
+                <span className="rounded-full border border-hairline bg-white/5 px-3 py-1.5">2 MIN · NO LIVE SPEND</span>
+              </div>
+              <h1 className="text-hero text-balance">Turn two keys. Watch the agent unlock.</h1>
+              <p className="mt-4 max-w-3xl text-lead">
+                Play Finance and CEO on one €30k decision. We’ll guide every handoff; the final action runs only when both keys approve the exact same version.
+              </p>
+            </div>
+            <DecisionConsole localDemo={localDemo} />
+          </Container>
+        </main>
+        <Footer />
+      </div>
+    </ViewTransition>
   );
 }

@@ -9,7 +9,7 @@ TwoKeys. It supersedes the earlier school-permission scenario.
 docs/
 ├── 01-product/       Why this product exists and where it stops
 ├── 02-demo/          The single scenario the judges will see
-├── 03-system/        Proposed architecture and normative contracts
+├── 03-system/        Implemented architecture and normative contracts
 ├── 04-validation/    How claims become evidence
 └── 05-delivery/      The shortest path to a working submission
 ```

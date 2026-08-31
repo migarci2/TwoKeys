@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Anton, Archivo } from "next/font/google";
+import { SkyBackground } from "@/components/sky/SkyBackground";
 import "./globals.css";
 
 const archivo = Archivo({
@@ -20,7 +21,6 @@ const anton = Anton({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://twokeys.dev"),
   title: {
     default: "TwoKeys - technical permission is not company authorization",
     template: "%s - TwoKeys",
@@ -49,7 +49,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       lang="en"
       className={`${archivo.variable} ${anton.variable} h-full antialiased`}
     >
-      <body className="min-h-full">{children}</body>
+      <body className="min-h-full">
+        <SkyBackground />
+        <div className="relative z-10 min-h-full">{children}</div>
+      </body>
     </html>
   );
 }

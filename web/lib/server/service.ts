@@ -2,6 +2,8 @@ import {
   AuthorityError,
   consumeLease,
   currentAction,
+  decisionStatus,
+  issueLease,
   recordReceipt,
   validateLease,
 } from "./authority.ts";
@@ -110,4 +112,26 @@ export async function reconcileCurrentDecision(
       }),
     observedAt,
   );
+}
+
+/**
+ * Completes the non-human part of the workflow. Human approvals are the only
+ * deliberate pauses; lease issue, provider mutation and safe reconciliation
+ * continue automatically once the matching keys exist.
+ */
+export async function settleCurrentDecision(
+  store: DecisionStore,
+  gateway: CampaignGateway,
+  clock: () => string = () => new Date().toISOString(),
+) {
+  let state = await store.read(clock());
+  let status = decisionStatus(state, clock());
+  if (status === "FULLY_APPROVED") {
+    const now = clock();
+    state = await store.update((current) => issueLease(current, now), now);
+    status = decisionStatus(state, clock());
+  }
+  if (status === "LEASED") return executeCurrentDecision(store, gateway, clock);
+  if (status === "CONSUMED") return reconcileCurrentDecision(store, gateway, clock);
+  return state;
 }

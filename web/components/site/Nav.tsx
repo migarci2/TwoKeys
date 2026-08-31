@@ -11,7 +11,7 @@ const LINKS = [
 
 export function Nav({ demo = false }: { demo?: boolean }) {
   return (
-    <header className="sticky top-0 z-50">
+    <header className="sticky top-0 z-50" style={{ viewTransitionName: "site-header" }}>
       {/* Scrim. A fixed-colour gradient does not work here: it is keyed to
           --canvas-top, but the canvas gets much lighter further down the page,
           so by mid-scroll the band no longer covered what passed under it and
@@ -49,6 +49,7 @@ export function Nav({ demo = false }: { demo?: boolean }) {
               there are no links to balance it against. */}
           <Link
             href="/"
+            transitionTypes={demo ? ["nav-back"] : undefined}
             className="col-start-1 flex items-center gap-2.5 justify-self-start md:col-start-2 md:justify-self-center"
           >
             <Lockup id="nav" />
@@ -57,6 +58,7 @@ export function Nav({ demo = false }: { demo?: boolean }) {
           <div className="col-start-3 flex items-center gap-2 justify-self-end">
             <Link
               href={demo ? "/" : "/demo"}
+              transitionTypes={[demo ? "nav-back" : "nav-forward"]}
               className="rounded-btn border border-hairline-strong px-4 py-2.5 text-sm font-medium whitespace-nowrap transition hover:bg-glass"
             >
               {demo ? "Back to the story" : "Open the demo"}

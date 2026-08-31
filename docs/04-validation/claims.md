@@ -5,7 +5,7 @@ moves from planned to defensible only after its evidence exists.
 
 ## Current truth
 
-As of 2026-08-13:
+As of 2026-08-24:
 
 | Claim area | Current evidence |
 |---|---|
@@ -15,11 +15,11 @@ As of 2026-08-13:
 | Google Ads test-account limits | Verified in official Google Ads documentation |
 | Google Ads campaign creation in `PAUSED` state | Verified in official Google Ads documentation |
 | Google Ads MPA limited to three user-access actions | Verified in official Google Ads documentation |
-| TwoKeys implementation | No evidence yet in this repository |
+| TwoKeys implementation | Local application, ADK agents, deterministic kernel, adapters and automated tests exist in this repository |
 | Real test-account campaign mutation by TwoKeys | Not yet demonstrated |
-| Benchmark results | Not yet executed |
-| Cross-role isolation | Proposed architecture, not yet measured |
-| Episode 2 adaptation | Proposed experiment, not yet measured |
+| Benchmark results | 54 automated local checks pass; Firestore emulator and live-provider evidence are tracked separately |
+| Cross-role isolation | Role-scoped storage and canary rejection implemented; final declared benchmark run pending |
+| Episode 2 adaptation | Local M1 memory-off/on check passes; final live Gemini evidence capture pending |
 
 ## Claims allowed after implementation
 
@@ -38,18 +38,15 @@ As of 2026-08-13:
 
 ## Claims allowed now
 
-These describe design intent, not completed behavior:
-
-- “TwoKeys is designed to bind one business action to the set of organizational
-  roles that own it, and the hackathon build exercises that set at two.”
-- “The hackathon build targets one Revenue Agent and one Google Ads test
-  campaign.”
-- “The proposed architecture keeps authorization and execution outside the
-  model.”
+- “TwoKeys binds one business action to the set of organizational roles that own
+  it, and the hackathon build exercises that set at two.”
+- “The hackathon build includes one ADK Revenue Agent and targets one Google Ads
+  test campaign.”
+- “The architecture keeps authorization and execution outside the model.”
 - “Keyholders are resolved from the action by deterministic policy, so an agent
   cannot select or influence who authorizes it.”
-- “The evaluation will test stale approvals, replay, expiry, revocation, numeric
-  fidelity, memory isolation, and later adaptation.”
+- “The automated suite tests stale approvals, replay, expiry, revocation,
+  numeric fidelity and memory isolation; later adaptation remains pending.”
 
 ## Claims to avoid
 

@@ -134,3 +134,33 @@ export interface SurfaceComparisonResponse {
   treatment: GeneratedSurfaceResponse;
   unchanged: { evidenceHash: boolean; policyVersion: boolean };
 }
+
+export interface RevenueAgentResponse {
+  source: "adk" | "fallback";
+  modelId: string;
+  signal: string;
+  decision: {
+    decisionId: string;
+    state: "AUTHORIZED" | "PENDING" | "DENIED";
+    requiredRoles: Role[];
+    matchedRuleIds: string[];
+  };
+}
+
+export interface DeliberationTurnView {
+  turnId: string;
+  speaker: "keyholder" | "agent";
+  text: string;
+  citations: string[];
+  source: "keyholder" | "adk" | "fallback";
+  createdAt: string;
+}
+
+export interface DeliberationResponse {
+  turns: DeliberationTurnView[];
+  reply?: {
+    text: string;
+    citations: string[];
+    source: "adk" | "fallback";
+  };
+}

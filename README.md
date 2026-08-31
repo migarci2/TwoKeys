@@ -145,9 +145,11 @@ calculations, hashes, approval validity, lease consumption, and execution.
 | [`web/`](web/) | Next.js UI, API routes, authority kernel, adapters, and tests |
 | [`web/integrations/plugin/`](web/integrations/plugin/) | Distributable agent-harness plugin bundle |
 | [`infra/deploy.sh`](infra/deploy.sh) | Guarded Google Cloud deployment |
+| [`diagrams/`](diagrams/) | Architecture source, editable Excalidraw scene, SVG, and PNG |
 | [`docs/01-product/`](docs/01-product/) | Product vision and scope |
 | [`docs/02-demo/`](docs/02-demo/) | Scenario and four-minute demo script |
 | [`docs/03-system/`](docs/03-system/) | Architecture, contracts, UI, integrations, and deployment |
 | [`docs/04-validation/`](docs/04-validation/) | Benchmark contract and claims ledger |
+| [`docs/05-delivery/project-story.md`](docs/05-delivery/project-story.md) | Devpost Project Story draft with GIF slots |
 
 Start with the [documentation map](docs/README.md) for the full project record.

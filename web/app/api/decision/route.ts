@@ -9,7 +9,11 @@ import {
 } from "@/lib/server/authority";
 import { decisionView } from "@/lib/server/dto";
 import { getCampaignGateway } from "@/lib/server/executor";
-import { executeCurrentDecision, reconcileCurrentDecision } from "@/lib/server/service";
+import {
+  executeCurrentDecision,
+  reconcileCurrentDecision,
+  settleCurrentDecision,
+} from "@/lib/server/service";
 import { requestHasAllowedOrigin } from "@/lib/server/request-origin";
 import { SESSION_COOKIE, verifySessionToken } from "@/lib/server/session";
 import { getDecisionStore } from "@/lib/server/store";
@@ -23,6 +27,7 @@ type Command =
   | { type: "issue_lease" }
   | { type: "execute" }
   | { type: "reconcile" }
+  | { type: "settle" }
   | { type: "revoke_lease"; leaseId: string };
 
 function response(body: unknown, status = 200) {
@@ -58,7 +63,8 @@ async function parseCommand(request: NextRequest): Promise<Command> {
     command.type === "approve" ||
     command.type === "issue_lease" ||
     command.type === "execute" ||
-    command.type === "reconcile"
+    command.type === "reconcile" ||
+    command.type === "settle"
   ) {
     return { type: command.type };
   }
@@ -109,6 +115,7 @@ export async function POST(request: NextRequest) {
         (current) => approve(current, actor.role, actor.principalId, now),
         now,
       );
+      state = await settleCurrentDecision(store, getCampaignGateway());
     } else if (command.type === "condition") {
       state = await store.update(
         (current) => addCeoCondition(current, actor.role, command.executeBefore, now),
@@ -123,8 +130,10 @@ export async function POST(request: NextRequest) {
       );
     } else if (command.type === "execute") {
       state = await executeCurrentDecision(store, getCampaignGateway());
-    } else {
+    } else if (command.type === "reconcile") {
       state = await reconcileCurrentDecision(store, getCampaignGateway());
+    } else {
+      state = await settleCurrentDecision(store, getCampaignGateway());
     }
 
     return response(decisionView(state, actor.role));
